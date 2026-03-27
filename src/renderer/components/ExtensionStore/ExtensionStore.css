@@ -1,0 +1,187 @@
+.ext-store-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-primary);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.2s ease;
+}
+
+.ext-store-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--bg-secondary);
+}
+
+.ext-store-back {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--border-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.ext-store-back:hover {
+  background: var(--tab-active-bg);
+  color: var(--text-primary);
+}
+
+.ext-store-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.ext-store-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 36px;
+}
+
+.ext-store-notice {
+  background: rgba(233, 69, 96, 0.08);
+  border: 1px solid rgba(233, 69, 96, 0.2);
+  border-radius: var(--border-radius);
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.ext-store-notice strong {
+  color: var(--accent);
+}
+
+.ext-store-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.ext-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+  margin-top: 8px;
+}
+
+.ext-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  margin-bottom: 32px;
+}
+
+.ext-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-lg);
+  padding: 16px;
+  display: flex;
+  gap: 14px;
+  transition: all var(--transition);
+  align-items: flex-start;
+}
+
+.ext-card:hover {
+  border-color: var(--border-hover);
+}
+
+.ext-card-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ext-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ext-card-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+
+.ext-card-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+
+.ext-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ext-card-version {
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--tab-bg);
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+.ext-card-btn {
+  padding: 5px 12px;
+  border-radius: var(--border-radius-sm);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  border: none;
+  font-family: var(--font);
+}
+
+.ext-card-btn.install {
+  background: var(--accent);
+  color: white;
+}
+
+.ext-card-btn.install:hover {
+  opacity: 0.85;
+}
+
+.ext-card-btn.store {
+  background: var(--tab-bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.ext-card-btn.store:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.ext-card-privacy-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  background: rgba(74, 222, 128, 0.12);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.2);
+}

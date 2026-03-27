@@ -1,0 +1,127 @@
+.widget-store-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-primary);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.2s ease;
+}
+
+.widget-store-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--bg-secondary);
+}
+
+.widget-store-back {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--border-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.widget-store-back:hover {
+  background: var(--tab-active-bg);
+  color: var(--text-primary);
+}
+
+.widget-store-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.widget-store-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 36px;
+}
+
+.widget-store-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 28px;
+}
+
+.widget-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.widget-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all var(--transition);
+}
+
+.widget-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.widget-card-icon {
+  font-size: 32px;
+  text-align: center;
+}
+
+.widget-card-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.widget-card-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.widget-card-btn {
+  width: 100%;
+  padding: 8px;
+  border-radius: var(--border-radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  border: none;
+  font-family: var(--font);
+}
+
+.widget-card-btn.add {
+  background: var(--accent);
+  color: white;
+}
+
+.widget-card-btn.add:hover {
+  opacity: 0.85;
+}
+
+.widget-card-btn.installed {
+  background: var(--tab-bg);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  cursor: default;
+}

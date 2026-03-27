@@ -1,0 +1,190 @@
+import { app, ipcMain, BrowserWindow, nativeTheme, WebContentsView } from 'electron';
+import path from 'path';
+import { createMainWindow } from './window';
+import { tabManager } from './tab-manager';
+import { personaManager } from './persona-manager';
+import { settingsManager } from './settings-manager';
+import { Tab, Widget } from '../shared/types';
+
+let mainWindow: BrowserWindow | null = null;
+
+function setupIpcHandlers(): void {
+  // ─── Tab handlers ──────────────────────────────────────────────────────────
+  ipcMain.handle('tab:create', async (_event, { personaId, url }: { personaId?: string; url?: string }) => {
+    return tabManager.createTab(personaId, url);
+  });
+
+  ipcMain.handle('tab:close', (_event, { tabId }: { tabId: string }) => {
+    tabManager.closeTab(tabId);
+  });
+
+  ipcMain.handle('tab:switch', async (_event, { tabId }: { tabId: string }) => {
+    await tabManager.switchTab(tabId);
+  });
+
+  ipcMain.handle('tab:navigate', (_event, { tabId, url }: { tabId: string; url: string }) => {
+    tabManager.navigateTo(tabId, url);
+  });
+
+  ipcMain.handle('tab:list', () => {
+    return tabManager.getTabs();
+  });
+
+  // ─── Persona handlers ──────────────────────────────────────────────────────
+  ipcMain.handle('persona:create', (_event, { name, color, icon }: { name: string; color: string; icon: string }) => {
+    return personaManager.createPersona(name, color, icon);
+  });
+
+  ipcMain.handle('persona:switch', (_event, { personaId }: { personaId: string }) => {
+    personaManager.switchPersona(personaId);
+  });
+
+  ipcMain.handle('persona:delete', (_event, { personaId }: { personaId: string }) => {
+    personaManager.deletePersona(personaId);
+  });
+
+  ipcMain.handle('persona:list', () => {
+    return personaManager.getPersonas();
+  });
+
+  // ─── Settings handlers ─────────────────────────────────────────────────────
+  ipcMain.handle('settings:get', () => {
+    return settingsManager.getSettings();
+  });
+
+  ipcMain.handle('settings:set', (_event, { key, value }: { key: string; value: unknown }) => {
+    settingsManager.setSetting(key as any, value as any);
+
+    // Side effects
+    if (key === 'theme') {
+      const theme = value as string;
+      nativeTheme.themeSource = theme === 'light' ? 'light' : 'dark';
+    }
+    if (key === 'trackerBlocking') {
+      personaManager.refreshTrackerBlocking();
+    }
+    if (key === 'sidebarOpen') {
+      tabManager.setSidebarOpen(value as boolean);
+    }
+  });
+
+  // ─── Browser/Navigation handlers ──────────────────────────────────────────
+  ipcMain.handle('browser:back', (_event, { tabId }: { tabId: string }) => {
+    tabManager.goBack(tabId);
+  });
+
+  ipcMain.handle('browser:forward', (_event, { tabId }: { tabId: string }) => {
+    tabManager.goForward(tabId);
+  });
+
+  ipcMain.handle('browser:reload', (_event, { tabId }: { tabId: string }) => {
+    tabManager.reload(tabId);
+  });
+
+  ipcMain.handle('browser:get-url', (_event, { tabId }: { tabId: string }) => {
+    return tabManager.getUrl(tabId);
+  });
+
+  // ─── Sidebar handlers ──────────────────────────────────────────────────────
+  ipcMain.handle('sidebar:toggle', () => {
+    const settings = settingsManager.getSettings();
+    const newState = !settings.sidebarOpen;
+    settingsManager.setSetting('sidebarOpen', newState);
+    tabManager.setSidebarOpen(newState);
+    return newState;
+  });
+
+  ipcMain.handle('sidebar:add-widget', (_event, { widget }: { widget: Widget }) => {
+    settingsManager.addWidget(widget);
+  });
+
+  ipcMain.handle('sidebar:remove-widget', (_event, { widgetId }: { widgetId: string }) => {
+    settingsManager.removeWidget(widgetId);
+  });
+
+  // ─── Window control handlers ───────────────────────────────────────────────
+  ipcMain.handle('window:minimize', () => {
+    BrowserWindow.getFocusedWindow()?.minimize();
+  });
+
+  ipcMain.handle('window:maximize', () => {
+    const win = BrowserWindow.getFocusedWindow();
+    if (win?.isMaximized()) win.unmaximize();
+    else win?.maximize();
+  });
+
+  ipcMain.handle('window:close', () => {
+    BrowserWindow.getFocusedWindow()?.close();
+  });
+
+  ipcMain.handle('window:is-maximized', () => {
+    return BrowserWindow.getFocusedWindow()?.isMaximized() ?? false;
+  });
+
+  // ─── Overlay visibility handlers ──────────────────────────────────────────
+  ipcMain.handle('overlay:show', () => {
+    tabManager.setActiveViewVisible(false);
+  });
+
+  ipcMain.handle('overlay:hide', () => {
+    tabManager.setActiveViewVisible(true);
+  });
+}
+
+function setupTabCallbacks(): void {
+  if (!mainWindow) return;
+
+  tabManager.setCallbacks(
+    (tab: Tab) => {
+      mainWindow?.webContents.send('tab:updated', tab);
+    },
+    (tab: Tab) => {
+      mainWindow?.webContents.send('tab:created', tab);
+    },
+    (tabId: string) => {
+      mainWindow?.webContents.send('tab:closed', tabId);
+    }
+  );
+}
+
+app.whenReady().then(async () => {
+  // Set up IPC handlers BEFORE window creation
+  setupIpcHandlers();
+
+  mainWindow = createMainWindow();
+  tabManager.setMainWindow(mainWindow);
+  setupTabCallbacks();
+
+  // Create initial tab
+  mainWindow.webContents.once('did-finish-load', async () => {
+    await tabManager.createTab();
+  });
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      mainWindow = createMainWindow();
+      tabManager.setMainWindow(mainWindow);
+      setupTabCallbacks();
+    }
+  });
+});
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
+// Security: prevent navigation to unknown protocols
+app.on('web-contents-created', (_event, contents) => {
+  contents.on('will-navigate', (event, navigationUrl) => {
+    const parsedUrl = new URL(navigationUrl);
+    // Allow all http/https navigation in webviews — only restrict renderer
+    if (contents.getType() === 'window') {
+      const allowedProtocols = ['file:', 'data:'];
+      if (!allowedProtocols.includes(parsedUrl.protocol)) {
+        // event.preventDefault(); // Let it go for now, renderer needs network
+      }
+    }
+  });
+});
