@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { Tab, Persona, Settings, Widget, PersonaAPI } from '../shared/types';
+import { Tab, Persona, Settings, Widget, PersonaAPI, UpdateState } from '../shared/types';
 
 const persona: PersonaAPI = {
   // Tabs
@@ -119,6 +119,14 @@ const persona: PersonaAPI = {
     ipcRenderer.on('browser:navigation-changed', listener);
     return () => ipcRenderer.removeListener('browser:navigation-changed', listener);
   },
+
+  onUpdateStateChanged: (callback: (state: UpdateState) => void) => {
+    const listener = (_: Electron.IpcRendererEvent, state: UpdateState) => callback(state);
+    ipcRenderer.on('update:state-changed', listener);
+    return () => ipcRenderer.removeListener('update:state-changed', listener);
+  },
+
+  installUpdate: () => ipcRenderer.invoke('update:install'),
 };
 
 contextBridge.exposeInMainWorld('persona', persona);

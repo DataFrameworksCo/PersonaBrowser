@@ -11,19 +11,24 @@
     "build:renderer": "webpack --config webpack.renderer.config.js --mode production",
     "build:main": "tsc --project tsconfig.main.json",
     "start": "electron . --no-sandbox",
-    "package": "npm run build && electron-builder"
+    "package": "npm run build && electron-builder --config electron-builder.yml --publish never",
+    "package:mac": "./scripts/package-mac.sh",
+    "package:mac:dmg": "./scripts/package-mac-dmg.sh",
+    "updates:serve": "node update-server.js"
   },
   "dependencies": {
     "electron-store": "^8.1.0",
+    "electron-updater": "^6.8.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@types/node": "^20.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
-    "@types/node": "^20.0.0",
     "concurrently": "^8.2.2",
     "css-loader": "^6.8.1",
+    "dmg-license": "^1.0.11",
     "electron": "^30.0.0",
     "electron-builder": "^24.9.1",
     "html-webpack-plugin": "^5.6.0",
@@ -33,13 +38,5 @@
     "wait-on": "^7.2.0",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4"
-  },
-  "build": {
-    "appId": "com.persona.browser",
-    "productName": "Persona Browser",
-    "files": ["dist/**/*", "src/renderer/index.html"],
-    "directories": {
-      "output": "release"
-    }
   }
 }

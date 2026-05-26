@@ -1,0 +1,1 @@
+window.PERSONA_SITE_CONFIG = window.PERSONA_SITE_CONFIG || {};

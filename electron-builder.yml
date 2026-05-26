@@ -5,7 +5,6 @@ artifactName: PersonaBrowser-${version}-${arch}.${ext}
 
 directories:
   output: release
-  buildResources: build
 
 files:
   - dist/**/*
@@ -16,19 +15,16 @@ linux:
     - AppImage
     - deb
   category: Network
-  icon: build/icons
 
 mac:
   target:
     - dmg
-  icon: build/icons/icon.icns
+    - zip
   darkModeSupport: true
-  artifactName: PersonaBrowser-${version}.${ext}
 
 win:
   target:
     - nsis
-  icon: build/icons/icon.ico
   artifactName: PersonaBrowser-Setup-${version}.${ext}
 
 nsis:

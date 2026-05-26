@@ -399,6 +399,7 @@ class TabManager {
     const bounds = this.getContentBounds();
     entry.view.setBounds(bounds);
     entry.view.setVisible(true);
+    entry.view.webContents.focus();
 
     this.onTabUpdatedCallback?.(this.getTabSnapshot(tabId));
   }

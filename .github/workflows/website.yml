@@ -3,6 +3,7 @@ name: Deploy Website
 on:
   push:
     branches:
+      - master
       - main
     paths:
       - 'website/**'
@@ -24,6 +25,14 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Inject site config
+        run: |
+          cat > website/site-config.js <<'EOF'
+          window.PERSONA_SITE_CONFIG = {
+            githubRepo: '${{ github.repository }}'
+          };
+          EOF
 
       - uses: actions/configure-pages@v4
 

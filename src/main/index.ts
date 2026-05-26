@@ -1,12 +1,26 @@
 import { app, ipcMain, BrowserWindow, nativeTheme, WebContentsView } from 'electron';
 import path from 'path';
+import { autoUpdater } from 'electron-updater';
 import { createMainWindow } from './window';
 import { tabManager } from './tab-manager';
 import { personaManager } from './persona-manager';
 import { settingsManager } from './settings-manager';
-import { Tab, Widget } from '../shared/types';
+import { Tab, Widget, UpdateState } from '../shared/types';
 
 let mainWindow: BrowserWindow | null = null;
+let updateCheckTimer: NodeJS.Timeout | null = null;
+let currentUpdateVersion: string | undefined;
+const UPDATE_CHECK_INTERVAL_MS = 4 * 60 * 60 * 1000;
+
+function sendUpdateState(state: UpdateState): void {
+  mainWindow?.webContents.send('update:state-changed', state);
+}
+
+function getConfiguredUpdateUrl(): string | null {
+  const rawUrl = process.env.PERSONA_UPDATE_URL?.trim();
+  if (!rawUrl) return null;
+  return rawUrl.replace(/\/+$/, '');
+}
 
 function setupIpcHandlers(): void {
   // ─── Tab handlers ──────────────────────────────────────────────────────────
@@ -129,6 +143,11 @@ function setupIpcHandlers(): void {
   ipcMain.handle('overlay:hide', () => {
     tabManager.setActiveViewVisible(true);
   });
+
+  // ─── Update handlers ───────────────────────────────────────────────────────
+  ipcMain.handle('update:install', () => {
+    autoUpdater.quitAndInstall();
+  });
 }
 
 function setupTabCallbacks(): void {
@@ -147,6 +166,70 @@ function setupTabCallbacks(): void {
   );
 }
 
+function setupAutoUpdater(): void {
+  const updateUrl = getConfiguredUpdateUrl();
+  if (!updateUrl) return;
+
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.setFeedURL({
+    provider: 'generic',
+    url: updateUrl,
+  });
+
+  autoUpdater.on('checking-for-update', () => {
+    sendUpdateState({ status: 'checking' });
+  });
+
+  autoUpdater.on('update-available', (info) => {
+    currentUpdateVersion = info.version;
+    sendUpdateState({ status: 'available', version: info.version });
+  });
+
+  autoUpdater.on('download-progress', (info) => {
+    sendUpdateState({
+      status: 'downloading',
+      version: currentUpdateVersion,
+      progressPercent: info.percent,
+      bytesPerSecond: info.bytesPerSecond,
+      transferredBytes: info.transferred,
+      totalBytes: info.total,
+    });
+  });
+
+  autoUpdater.on('update-not-available', (info) => {
+    currentUpdateVersion = undefined;
+    sendUpdateState({ status: 'not-available', version: info.version });
+  });
+
+  autoUpdater.on('update-downloaded', (info) => {
+    currentUpdateVersion = info.version;
+    sendUpdateState({ status: 'downloaded', version: info.version });
+  });
+
+  autoUpdater.on('error', (error) => {
+    sendUpdateState({
+      status: 'error',
+      version: currentUpdateVersion,
+      message: error.message,
+    });
+  });
+
+  autoUpdater.checkForUpdates().catch((error: Error) => {
+    sendUpdateState({ status: 'error', message: error.message });
+  });
+
+  updateCheckTimer = setInterval(() => {
+    autoUpdater.checkForUpdates().catch((error: Error) => {
+      sendUpdateState({
+        status: 'error',
+        version: currentUpdateVersion,
+        message: error.message,
+      });
+    });
+  }, UPDATE_CHECK_INTERVAL_MS);
+}
+
 app.whenReady().then(async () => {
   // Set up IPC handlers BEFORE window creation
   setupIpcHandlers();
@@ -158,6 +241,7 @@ app.whenReady().then(async () => {
   // Create initial tab
   mainWindow.webContents.once('did-finish-load', async () => {
     await tabManager.createTab();
+    if (app.isPackaged) setupAutoUpdater();
   });
 
   app.on('activate', () => {
@@ -170,6 +254,11 @@ app.whenReady().then(async () => {
 });
 
 app.on('window-all-closed', () => {
+  if (updateCheckTimer) {
+    clearInterval(updateCheckTimer);
+    updateCheckTimer = null;
+  }
+
   if (process.platform !== 'darwin') {
     app.quit();
   }

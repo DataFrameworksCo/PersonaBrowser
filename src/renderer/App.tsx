@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TabBar from './components/TabBar/TabBar';
 import Toolbar from './components/Toolbar/Toolbar';
 import Sidebar from './components/Sidebar/Sidebar';
@@ -7,13 +7,31 @@ import Settings from './components/Settings/Settings';
 import WidgetStore from './components/WidgetStore/WidgetStore';
 import ExtensionStore from './components/ExtensionStore/ExtensionStore';
 import { useBrowser } from './contexts/BrowserContext';
+import { UpdateState } from '../shared/types';
 
 type OverlayPage = 'settings' | 'widget-store' | 'extension-store' | null;
 
 const App: React.FC = () => {
   const [overlay, setOverlay] = useState<OverlayPage>(null);
   const [showPersonaSwitcher, setShowPersonaSwitcher] = useState(false);
+  const [updateState, setUpdateState] = useState<UpdateState | null>(null);
   const { sidebarOpen, toggleSidebar } = useBrowser();
+
+  useEffect(() => {
+    const offUpdateStateChanged = window.persona.onUpdateStateChanged((nextState) => {
+      setUpdateState((currentState) => {
+        if (nextState.status === 'not-available') return null;
+        if (nextState.status === 'checking' && currentState?.status === 'downloaded') {
+          return currentState;
+        }
+        return nextState;
+      });
+    });
+
+    return () => {
+      offUpdateStateChanged();
+    };
+  }, []);
 
   const openOverlay = (page: OverlayPage) => {
     window.persona.showOverlay();
@@ -39,6 +57,40 @@ const App: React.FC = () => {
     await toggleSidebar();
   };
 
+  const shouldShowUpdateBanner = updateState !== null
+    && ['available', 'downloading', 'downloaded', 'error'].includes(updateState.status);
+
+  const updateLabel = updateState?.version
+    ? `Version ${updateState.version}`
+    : 'A new version';
+
+  const updateMessage = (() => {
+    if (!updateState) return '';
+
+    if (updateState.status === 'downloaded') {
+      return `${updateLabel} is ready to install.`;
+    }
+
+    if (updateState.status === 'downloading') {
+      const progressLabel = typeof updateState.progressPercent === 'number'
+        ? ` (${Math.round(updateState.progressPercent)}%)`
+        : '';
+      return `${updateLabel} is downloading${progressLabel}.`;
+    }
+
+    if (updateState.status === 'available') {
+      return `${updateLabel} is available. Downloading now.`;
+    }
+
+    if (updateState.status === 'error') {
+      return updateState.message
+        ? `Update check failed: ${updateState.message}`
+        : 'Update check failed.';
+    }
+
+    return '';
+  })();
+
   return (
     <div
       style={{
@@ -49,7 +101,44 @@ const App: React.FC = () => {
         background: 'var(--bg-primary)',
       }}
     >
-      {/* Top chrome: TabBar + Toolbar */}
+      {shouldShowUpdateBanner && updateState && (
+        <div style={{
+          background: 'var(--accent, #e94560)',
+          color: '#fff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 12,
+          padding: '6px 16px',
+          fontSize: 13,
+          zIndex: 9999,
+        }}>
+          <span>{updateMessage}</span>
+          {updateState.status === 'downloaded' && (
+            <button
+              onClick={() => window.persona.installUpdate()}
+              style={{
+                background: 'rgba(255,255,255,0.2)',
+                border: '1px solid rgba(255,255,255,0.4)',
+                borderRadius: 4,
+                color: '#fff',
+                cursor: 'pointer',
+                padding: '3px 12px',
+                fontSize: 13,
+              }}
+            >
+              Install Now
+            </button>
+          )}
+          <button
+            onClick={() => setUpdateState(null)}
+            style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 16, lineHeight: 1 }}
+          >
+            x
+          </button>
+        </div>
+      )}
+
       <TabBar />
       <Toolbar
         onOpenSettings={() => openOverlay('settings')}
@@ -57,7 +146,6 @@ const App: React.FC = () => {
         onToggleSidebar={handleToggleSidebar}
       />
 
-      {/* Content area */}
       <div
         style={{
           display: 'flex',
@@ -66,7 +154,6 @@ const App: React.FC = () => {
           position: 'relative',
         }}
       >
-        {/* WebContentsView fills remaining space — managed by main process */}
         <div
           id="web-content-placeholder"
           style={{
@@ -77,11 +164,9 @@ const App: React.FC = () => {
           }}
         />
 
-        {/* Sidebar */}
         <Sidebar onOpenWidgetStore={() => openOverlay('widget-store')} />
       </div>
 
-      {/* Overlays */}
       {showPersonaSwitcher && (
         <PersonaSwitcher onClose={closePersonaSwitcher} />
       )}

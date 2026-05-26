@@ -85,6 +85,24 @@ export interface PrivacyInfo {
   blockedTrackers: string[];
 }
 
+export type UpdateStatus =
+  | 'checking'
+  | 'available'
+  | 'downloading'
+  | 'downloaded'
+  | 'not-available'
+  | 'error';
+
+export interface UpdateState {
+  status: UpdateStatus;
+  version?: string;
+  progressPercent?: number;
+  bytesPerSecond?: number;
+  transferredBytes?: number;
+  totalBytes?: number;
+  message?: string;
+}
+
 export interface IpcTabPayload {
   tabId?: string;
   url?: string;
@@ -139,6 +157,8 @@ export interface PersonaAPI {
   onFaviconChanged: (callback: (data: { tabId: string; favicon: string }) => void) => () => void;
   onLoadingChanged: (callback: (data: { tabId: string; isLoading: boolean }) => void) => () => void;
   onNavigationChanged: (callback: (data: { tabId: string; canGoBack: boolean; canGoForward: boolean }) => void) => () => void;
+  onUpdateStateChanged: (callback: (state: UpdateState) => void) => () => void;
+  installUpdate: () => Promise<void>;
 }
 
 declare global {

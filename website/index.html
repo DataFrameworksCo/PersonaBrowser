@@ -691,7 +691,7 @@
     <li><a href="#features">Features</a></li>
     <li><a href="#personas">Personas</a></li>
     <li><a href="#download">Download</a></li>
-    <li><a href="https://github.com/sethpersonabrowser/persona-browser" target="_blank">GitHub</a></li>
+    <li><a href="https://github.com/sethpersonabrowser/persona-browser" data-github-repo-link target="_blank">GitHub</a></li>
     <li><a href="#download" class="nav-cta">Download Free</a></li>
   </ul>
 </nav>
@@ -705,21 +705,21 @@
     Persona Browser keeps your work, personal, and private browsing completely isolated — different sessions, different cookies, different you.
   </p>
   <div class="download-group">
-    <a class="dl-btn windows" href="https://github.com/YOUR_USERNAME/PersonaBrowser/releases/latest/download/PersonaBrowser-Setup-1.0.0.exe" download>
+    <a class="dl-btn windows" href="https://github.com/sethpersonabrowser/persona-browser/releases/latest" data-download-platform="windows" download>
       <span class="dl-btn-icon">🪟</span>
       <div class="dl-btn-text">
         <div class="dl-btn-label">Download for</div>
         <div class="dl-btn-name">Windows</div>
       </div>
     </a>
-    <a class="dl-btn mac" href="https://github.com/YOUR_USERNAME/PersonaBrowser/releases/latest/download/PersonaBrowser-1.0.0.dmg" download>
+    <a class="dl-btn mac" href="https://github.com/sethpersonabrowser/persona-browser/releases/latest" data-download-platform="mac" download>
       <span class="dl-btn-icon">🍎</span>
       <div class="dl-btn-text">
         <div class="dl-btn-label">Download for</div>
         <div class="dl-btn-name">macOS</div>
       </div>
     </a>
-    <a class="dl-btn linux" href="https://github.com/YOUR_USERNAME/PersonaBrowser/releases/latest/download/PersonaBrowser-1.0.0-x64.AppImage" download>
+    <a class="dl-btn linux" href="https://github.com/sethpersonabrowser/persona-browser/releases/latest" data-download-platform="linux" download>
       <span class="dl-btn-icon">🐧</span>
       <div class="dl-btn-text">
         <div class="dl-btn-label">Download for</div>
@@ -727,7 +727,7 @@
       </div>
     </a>
   </div>
-  <p class="hero-note">Version 1.0.0 · Free forever · <a href="https://github.com/sethpersonabrowser/persona-browser">View source</a></p>
+  <p class="hero-note">Version 1.0.0 · Free forever · <a href="https://github.com/sethpersonabrowser/persona-browser" data-github-repo-link>View source</a></p>
 </section>
 
 <!-- BROWSER MOCKUP -->
@@ -894,19 +894,19 @@
     Free, open source, and available for all major platforms. No account required.
   </p>
   <div class="download-cards">
-    <a class="download-card windows" href="https://github.com/YOUR_USERNAME/PersonaBrowser/releases/latest/download/PersonaBrowser-Setup-1.0.0.exe" download>
+    <a class="download-card windows" href="https://github.com/sethpersonabrowser/persona-browser/releases/latest" data-download-platform="windows" download>
       <span class="dl-card-icon">🪟</span>
       <div class="dl-card-os">Windows</div>
       <div class="dl-card-format">NSIS Installer · .exe</div>
       <span class="dl-card-btn">Download for Windows</span>
     </a>
-    <a class="download-card mac" href="https://github.com/YOUR_USERNAME/PersonaBrowser/releases/latest/download/PersonaBrowser-1.0.0.dmg" download>
+    <a class="download-card mac" href="https://github.com/sethpersonabrowser/persona-browser/releases/latest" data-download-platform="mac" download>
       <span class="dl-card-icon">🍎</span>
       <div class="dl-card-os">macOS</div>
       <div class="dl-card-format">Disk Image · .dmg</div>
       <span class="dl-card-btn">Download for macOS</span>
     </a>
-    <a class="download-card linux" href="https://github.com/YOUR_USERNAME/PersonaBrowser/releases/latest/download/PersonaBrowser-1.0.0-x64.AppImage" download>
+    <a class="download-card linux" href="https://github.com/sethpersonabrowser/persona-browser/releases/latest" data-download-platform="linux" download>
       <span class="dl-card-icon">🐧</span>
       <div class="dl-card-os">Linux</div>
       <div class="dl-card-format">AppImage · Portable</div>
@@ -914,7 +914,7 @@
     </a>
   </div>
   <p style="margin-top:32px;font-size:13px;color:var(--muted)">
-    Also available as <a href="https://github.com/YOUR_USERNAME/PersonaBrowser/releases/latest/download/PersonaBrowser-1.0.0-amd64.deb" style="color:var(--accent);text-decoration:underline">.deb package</a> for Debian/Ubuntu.
+    Also available as <a href="https://github.com/sethpersonabrowser/persona-browser/releases/latest" data-download-platform="deb" style="color:var(--accent);text-decoration:underline">.deb package</a> for Debian/Ubuntu.
     <br/>Requires 64-bit OS · ~120 MB · No auto-update (yet)
   </p>
 </section>
@@ -926,12 +926,78 @@
     Persona Browser
   </div>
   <ul class="footer-links">
-    <li><a href="https://github.com/sethpersonabrowser/persona-browser">GitHub</a></li>
+    <li><a href="https://github.com/sethpersonabrowser/persona-browser" data-github-repo-link>GitHub</a></li>
     <li><a href="#features">Features</a></li>
     <li><a href="#download">Download</a></li>
   </ul>
   <span class="footer-copy">© 2026 Persona Browser. Open source.</span>
 </footer>
 
+<script src="./site-config.js"></script>
+<script>
+  function inferGitHubRepoFromLocation() {
+    const { hostname, pathname } = window.location;
+    if (!hostname.endsWith('.github.io')) {
+      return null;
+    }
+
+    const owner = hostname.replace(/\.github\.io$/, '');
+    const repo = pathname.split('/').filter(Boolean)[0];
+    return owner && repo ? `${owner}/${repo}` : null;
+  }
+
+  const releaseRepo =
+    window.PERSONA_SITE_CONFIG?.githubRepo ||
+    inferGitHubRepoFromLocation() ||
+    'sethpersonabrowser/persona-browser';
+  const releasePageUrl = `https://github.com/${releaseRepo}/releases/latest`;
+  const latestReleaseApiUrl = `https://api.github.com/repos/${releaseRepo}/releases/latest`;
+
+  function findAsset(assets, platform) {
+    const matchers = {
+      windows: asset => asset.name.endsWith('.exe'),
+      mac: asset => asset.name.endsWith('.dmg'),
+      linux: asset => asset.name.endsWith('.AppImage'),
+      deb: asset => asset.name.endsWith('.deb')
+    };
+
+    return assets.find(matchers[platform]);
+  }
+
+  async function hydrateDownloadLinks() {
+    const links = document.querySelectorAll('[data-download-platform]');
+    const repoLinks = document.querySelectorAll('[data-github-repo-link]');
+    links.forEach(link => {
+      link.href = releasePageUrl;
+    });
+    repoLinks.forEach(link => {
+      link.href = `https://github.com/${releaseRepo}`;
+    });
+
+    try {
+      const response = await fetch(latestReleaseApiUrl, {
+        headers: { Accept: 'application/vnd.github+json' }
+      });
+
+      if (!response.ok) {
+        return;
+      }
+
+      const release = await response.json();
+      const assets = Array.isArray(release.assets) ? release.assets : [];
+
+      links.forEach(link => {
+        const asset = findAsset(assets, link.dataset.downloadPlatform);
+        if (asset && asset.browser_download_url) {
+          link.href = asset.browser_download_url;
+        }
+      });
+    } catch (error) {
+      console.warn('Failed to resolve latest release assets', error);
+    }
+  }
+
+  hydrateDownloadLinks();
+</script>
 </body>
 </html>
