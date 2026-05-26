@@ -2,6 +2,10 @@
   "name": "persona-browser",
   "version": "1.0.0",
   "description": "Privacy-focused Chromium browser with persona isolation",
+  "author": {
+    "name": "Seth Floyd",
+    "email": "thegoodcomputerco@gmail.com"
+  },
   "main": "dist/main/index.js",
   "scripts": {
     "dev": "concurrently \"npm run dev:renderer\" \"npm run dev:main\"",
