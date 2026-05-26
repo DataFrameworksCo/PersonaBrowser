@@ -129,28 +129,23 @@ const Toolbar: React.FC<ToolbarProps> = ({
       </form>
 
       <div className="toolbar-right">
-        <button className="toolbar-btn" onClick={onOpenCommandCenter} title="Command center">
-          <AppIcon name="search" size={15} />
+        <button className="toolbar-btn" onClick={onOpenCommandCenter} title="Command center (⌘K)">
+          <AppIcon name="search" size={14} />
         </button>
-
         <button className="toolbar-btn" onClick={onOpenHistory} title="History">
-          <AppIcon name="history" size={15} />
+          <AppIcon name="history" size={14} />
         </button>
-
         <button className="toolbar-btn" onClick={onOpenDownloads} title="Downloads">
-          <AppIcon name="download" size={15} />
+          <AppIcon name="download" size={14} />
         </button>
 
-        <div className="toolbar-site-chip" title={activeTab?.url ?? 'Start page'}>
-          <AppIcon name="globe" size={13} />
-          <span>{activeHost}</span>
-        </div>
+        <div className="toolbar-divider" />
 
         <button
           className="toolbar-persona-badge"
           onClick={onTogglePersonaSwitcher}
           title="Switch persona"
-          style={{ borderColor: activePersona?.color ?? undefined }}
+          style={{ borderColor: `${activePersona?.color ?? '#808080'}55` }}
         >
           <div
             className="toolbar-persona-dot"
@@ -160,16 +155,16 @@ const Toolbar: React.FC<ToolbarProps> = ({
           <span>{activePersona?.name ?? 'Personal'}</span>
         </button>
 
+        <div className="toolbar-divider" />
+
         <button className="toolbar-btn" onClick={onToggleSidebar} title="Toggle sidebar">
-          <AppIcon name="sidebar" size={15} />
+          <AppIcon name="sidebar" size={14} />
         </button>
-
         <button className="toolbar-btn" onClick={onOpenExtensions} title="Extensions">
-          <AppIcon name="layout" size={15} />
+          <AppIcon name="layout" size={14} />
         </button>
-
         <button className="toolbar-btn" onClick={onOpenSettings} title="Settings">
-          <AppIcon name="settings" size={15} />
+          <AppIcon name="settings" size={14} />
         </button>
       </div>
     </div>

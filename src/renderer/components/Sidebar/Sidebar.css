@@ -1,13 +1,13 @@
 .sidebar {
   width: var(--sidebar-width);
   height: 100%;
-  background: color-mix(in srgb, var(--bg-secondary) 92%, transparent);
+  background: color-mix(in srgb, var(--bg-secondary) 96%, transparent);
   border-left: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   overflow: hidden;
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar.closed {
@@ -69,13 +69,10 @@
 
 .sidebar-overview-card {
   padding: 14px;
-  border-radius: 18px;
-  background:
-    radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.22), transparent 42%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  margin-bottom: 12px;
-  box-shadow: var(--shadow);
+  border-radius: var(--border-radius-lg);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025));
+  border: 1px solid var(--glass-border);
+  margin-bottom: 10px;
 }
 
 .sidebar-overview-top {
@@ -158,23 +155,36 @@
 }
 
 .sidebar-overview-action {
-  min-height: 36px;
-  border-radius: 12px;
+  min-height: 34px;
+  border-radius: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: 6px;
   font-size: 12px;
   font-weight: 600;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.04);
   color: var(--text-secondary);
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+  cursor: pointer;
+}
+
+.sidebar-overview-action:hover {
+  background: var(--tab-active-bg);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
 }
 
 .sidebar-overview-action.primary {
-  background: linear-gradient(135deg, var(--accent), rgba(var(--accent-rgb), 0.84));
-  border-color: transparent;
-  color: white;
+  background: rgba(var(--accent-rgb), 0.12);
+  border-color: rgba(var(--accent-rgb), 0.25);
+  color: var(--accent);
+}
+
+.sidebar-overview-action.primary:hover {
+  background: rgba(var(--accent-rgb), 0.2);
+  border-color: rgba(var(--accent-rgb), 0.4);
 }
 
 .sidebar-widget {

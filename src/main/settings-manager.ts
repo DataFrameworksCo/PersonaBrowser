@@ -44,7 +44,7 @@ const DEFAULT_WIDGETS: Widget[] = [
 
 const DEFAULT_SETTINGS: Settings = {
   theme: 'dark',
-  accentColor: '#e94560',
+  accentColor: '#6366f1',
   defaultSearchEngine: 'duckduckgo',
   privacyLevel: 'standard',
   trackerBlocking: true,
@@ -78,8 +78,12 @@ class SettingsManager {
 
   getSettings(): Settings {
     const stored = this.store.get('settings') as Settings;
-    // Merge with defaults to handle new keys added in updates
-    return { ...DEFAULT_SETTINGS, ...stored };
+    const merged = { ...DEFAULT_SETTINGS, ...stored };
+    // Migrate old default accent color to new default
+    if (merged.accentColor === '#e94560') {
+      merged.accentColor = DEFAULT_SETTINGS.accentColor;
+    }
+    return merged;
   }
 
   setSetting<K extends keyof Settings>(key: K, value: Settings[K]): void {

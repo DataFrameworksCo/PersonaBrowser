@@ -10,14 +10,14 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue>({
   theme: 'dark',
-  accentColor: '#e94560',
+  accentColor: '#6366f1',
   setTheme: () => {},
   setAccentColor: () => {},
 });
 
 const hexToRgb = (hex: string) => {
   const normalized = hex.replace('#', '');
-  if (normalized.length !== 6) return '233, 69, 96';
+  if (normalized.length !== 6) return '99, 102, 241';
   const numericValue = Number.parseInt(normalized, 16);
   const r = (numericValue >> 16) & 255;
   const g = (numericValue >> 8) & 255;
@@ -27,7 +27,7 @@ const hexToRgb = (hex: string) => {
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>('dark');
-  const [accentColor, setAccentColorState] = useState('#e94560');
+  const [accentColor, setAccentColorState] = useState('#6366f1');
 
   useEffect(() => {
     window.persona.getSettings().then((settings) => {

@@ -4,7 +4,9 @@ import { personaManager } from './persona-manager';
 import { settingsManager } from './settings-manager';
 import { historyManager } from './history-manager';
 
-const TOOLBAR_HEIGHT = 88; // TabBar (44px) + Toolbar (44px)
+const TAB_BAR_HEIGHT = 40;
+const TOOLBAR_ROW_HEIGHT = 48;
+const TOOLBAR_HEIGHT = TAB_BAR_HEIGHT + TOOLBAR_ROW_HEIGHT; // 88
 const SIDEBAR_WIDTH = 280;
 
 interface TabEntry {
@@ -139,6 +141,7 @@ class TabManager {
       brave: 'https://search.brave.com/search?q=',
     }[settings.defaultSearchEngine] ?? 'https://duckduckgo.com/?q=';
 
+    const accentColor = persona?.color ?? '#6366f1';
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -148,332 +151,190 @@ class TabManager {
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
       background:
-        radial-gradient(circle at top right, ${persona?.color ?? '#e94560'}44, transparent 24%),
-        radial-gradient(circle at bottom left, rgba(255,255,255,0.12), transparent 18%),
-        linear-gradient(160deg, #09111f 0%, #13203a 48%, #0b1424 100%);
+        radial-gradient(ellipse 60% 50% at 70% 0%, ${accentColor}1a, transparent),
+        linear-gradient(180deg, #0b1120 0%, #111827 100%);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       color: white;
-      padding: 32px;
+      padding: 40px 24px;
       overflow: hidden;
     }
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background:
-        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-      background-size: 40px 40px;
-      mask-image: radial-gradient(circle at center, black, transparent 72%);
-      pointer-events: none;
-    }
-    .persona-badge {
-      position: fixed;
-      top: 28px;
-      right: 28px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.16);
-      border-radius: 999px;
-      padding: 10px 16px;
-      font-size: 14px;
-      font-weight: 600;
-      backdrop-filter: blur(18px);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
-    }
-    .persona-dot {
-      width: 11px;
-      height: 11px;
-      border-radius: 50%;
-      background: ${persona?.color ?? '#e94560'};
-    }
     .shell {
-      width: min(980px, 100%);
+      width: min(680px, 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 28px;
-      position: relative;
-      z-index: 1;
+      gap: 24px;
     }
-    .eyebrow {
-      padding: 8px 14px;
+    .persona-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 12px 5px 8px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(255,255,255,0.06);
-      color: rgba(255,255,255,0.76);
-      font-size: 11px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      font-weight: 700;
+      border: 1px solid ${accentColor}33;
+      background: ${accentColor}0f;
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.75);
+      letter-spacing: 0.01em;
     }
-    .hero {
+    .persona-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: ${accentColor};
+      flex-shrink: 0;
+    }
+    .clock-block {
       text-align: center;
       display: flex;
       flex-direction: column;
-      gap: 14px;
-    }
-    .hero h1 {
-      font-size: clamp(42px, 7vw, 72px);
-      line-height: 0.94;
-      letter-spacing: -0.06em;
-      max-width: 780px;
-    }
-    .hero p {
-      font-size: 17px;
-      color: rgba(255,255,255,0.68);
-      max-width: 680px;
-      line-height: 1.6;
+      gap: 4px;
     }
     .clock {
-      font-size: clamp(54px, 8vw, 88px);
+      font-size: clamp(60px, 10vw, 96px);
       font-weight: 700;
-      letter-spacing: -0.06em;
-      text-shadow: 0 0 40px rgba(255,255,255,0.16);
+      letter-spacing: -0.05em;
+      color: #f0f4ff;
+      line-height: 1;
+    }
+    .clock-seconds {
+      font-size: 0.42em;
+      font-weight: 500;
+      color: rgba(255,255,255,0.45);
+      vertical-align: middle;
     }
     .date {
-      font-size: 15px;
-      color: rgba(255,255,255,0.58);
+      font-size: 14px;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 0.02em;
     }
-    .search-container {
-      width: min(720px, 100%);
+    .search-wrap {
+      width: 100%;
     }
     .search-form {
       display: flex;
       align-items: center;
-      gap: 12px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.16);
-      border-radius: 24px;
-      padding: 8px 8px 8px 18px;
-      backdrop-filter: blur(24px);
-      transition: all 0.3s ease;
-      box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+      gap: 0;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 4px 4px 4px 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
     .search-form:focus-within {
-      background: rgba(255,255,255,0.12);
-      border-color: ${persona?.color ?? '#e94560'};
-      box-shadow: 0 0 0 4px ${persona?.color ?? '#e94560'}22;
-    }
-    .search-icon {
-      width: 22px;
-      height: 22px;
-      border-radius: 999px;
-      display: grid;
-      place-items: center;
-      color: rgba(255,255,255,0.8);
+      border-color: ${accentColor}66;
+      box-shadow: 0 0 0 3px ${accentColor}18;
     }
     .search-input {
       flex: 1;
       background: transparent;
       border: none;
       outline: none;
-      color: white;
-      font-size: 18px;
-      padding: 12px 0;
+      color: rgba(255,255,255,0.9);
+      font-size: 15px;
+      padding: 10px 0;
     }
-    .search-input::placeholder { color: rgba(255,255,255,0.4); }
+    .search-input::placeholder { color: rgba(255,255,255,0.3); }
     .search-btn {
-      background: linear-gradient(135deg, ${persona?.color ?? '#e94560'}, ${persona?.color ?? '#e94560'}cc);
+      background: ${accentColor};
       border: none;
-      border-radius: 18px;
+      border-radius: 12px;
       color: white;
       cursor: pointer;
-      padding: 14px 22px;
-      font-size: 14px;
-      font-weight: 700;
-      transition: opacity 0.2s, transform 0.2s;
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      transition: opacity 0.15s, transform 0.15s;
+      flex-shrink: 0;
     }
-    .search-btn:hover { opacity: 0.92; transform: translateY(-1px); }
-    .dashboard {
-      width: min(900px, 100%);
+    .search-btn:hover { opacity: 0.88; transform: scale(0.98); }
+    .shortcuts {
+      width: 100%;
       display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 18px;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
     }
-    .panel {
-      border-radius: 26px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      backdrop-filter: blur(22px);
-      padding: 20px;
-      box-shadow: 0 24px 60px rgba(0,0,0,0.24);
-    }
-    .panel-kicker {
-      color: rgba(255,255,255,0.5);
+    .shortcut {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      padding: 12px 8px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.04);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, transform 0.15s;
+      text-decoration: none;
+      color: rgba(255,255,255,0.75);
       font-size: 11px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      font-weight: 700;
+      font-weight: 500;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .panel-title {
-      margin-top: 10px;
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: -0.04em;
+    .shortcut:hover {
+      background: rgba(255,255,255,0.09);
+      border-color: rgba(255,255,255,0.14);
+      transform: translateY(-1px);
+      color: rgba(255,255,255,0.9);
     }
-    .panel-subtitle {
-      margin-top: 8px;
-      color: rgba(255,255,255,0.66);
-      font-size: 14px;
-      line-height: 1.6;
-    }
-    .quick-links {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 18px;
-    }
-    .quick-link {
+    .shortcut-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
-      justify-content: flex-start;
-      gap: 12px;
-      min-height: 82px;
-      padding: 14px;
-      text-align: left;
+      justify-content: center;
+      font-size: 17px;
       background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 18px;
-      text-decoration: none;
-      color: rgba(255,255,255,0.86);
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .quick-link:hover {
-      background: rgba(255,255,255,0.1);
-      transform: translateY(-2px);
-      border-color: rgba(255,255,255,0.24);
-    }
-    .quick-link-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      background: rgba(255,255,255,0.08);
-      flex-shrink: 0;
-      font-size: 18px;
-    }
-    .quick-link-title {
-      font-weight: 700;
-    }
-    .quick-link-url {
-      color: rgba(255,255,255,0.52);
-      font-size: 11px;
-      margin-top: 4px;
-    }
-    .focus-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 18px;
-    }
-    .focus-card {
-      align-items: center;
-      padding: 14px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-    .focus-card strong {
-      display: block;
-      font-size: 15px;
-      margin-top: 8px;
-    }
-    .focus-card span {
-      display: block;
-      color: rgba(255,255,255,0.58);
-      font-size: 12px;
-      line-height: 1.5;
-      margin-top: 6px;
-    }
-    @media (max-width: 760px) {
-      .dashboard { grid-template-columns: 1fr; }
-      .quick-links { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .persona-badge { left: 20px; right: auto; top: 20px; }
     }
   </style>
 </head>
 <body>
-  <div class="persona-badge">
-    <div class="persona-dot"></div>
-    ${persona?.icon ?? '🌐'} ${persona?.name ?? 'Personal'}
-  </div>
   <main class="shell">
-    <div class="eyebrow">Persona Browser Workspace</div>
-    <section class="hero">
-      <h1>One browser. Many identities.</h1>
-      <p>Separate work, personal, and private sessions in a cleaner browser shell built for focus.</p>
-      <div class="clock" id="clock">00:00:00</div>
+    <div class="persona-pill">
+      <div class="persona-dot"></div>
+      ${persona?.icon ?? ''} ${persona?.name ?? 'Personal'}
+    </div>
+    <div class="clock-block">
+      <div class="clock" id="clock">00:00<span class="clock-seconds" id="secs">:00</span></div>
       <div class="date" id="date"></div>
-    </section>
-    <div class="search-container">
+    </div>
+    <div class="search-wrap">
       <form class="search-form" id="searchForm">
-        <div class="search-icon">⌕</div>
-        <input class="search-input" type="text" placeholder="Search or enter address..." id="searchInput" autofocus>
+        <input class="search-input" type="text" placeholder="Search or enter address…" id="searchInput" autofocus>
         <button class="search-btn" type="submit">Go</button>
       </form>
     </div>
-    <section class="dashboard">
-      <div class="panel">
-        <div class="panel-kicker">Quick Launch</div>
-        <div class="panel-title">Start from somewhere useful</div>
-        <div class="panel-subtitle">Jump straight into the places you visit most while keeping each persona isolated.</div>
-        <div class="quick-links">
-          <a class="quick-link" onclick="navigate('https://github.com')">
-            <span class="quick-link-icon">◎</span>
-            <div><div class="quick-link-title">GitHub</div><div class="quick-link-url">github.com</div></div>
-          </a>
-          <a class="quick-link" onclick="navigate('https://news.ycombinator.com')">
-            <span class="quick-link-icon">HN</span>
-            <div><div class="quick-link-title">Hacker News</div><div class="quick-link-url">news.ycombinator.com</div></div>
-          </a>
-          <a class="quick-link" onclick="navigate('https://reddit.com')">
-            <span class="quick-link-icon">R</span>
-            <div><div class="quick-link-title">Reddit</div><div class="quick-link-url">reddit.com</div></div>
-          </a>
-          <a class="quick-link" onclick="navigate('https://youtube.com')">
-            <span class="quick-link-icon">▶</span>
-            <div><div class="quick-link-title">YouTube</div><div class="quick-link-url">youtube.com</div></div>
-          </a>
-          <a class="quick-link" onclick="navigate('https://x.com')">
-            <span class="quick-link-icon">X</span>
-            <div><div class="quick-link-title">X</div><div class="quick-link-url">x.com</div></div>
-          </a>
-          <a class="quick-link" onclick="navigate('https://proton.me')">
-            <span class="quick-link-icon">✉</span>
-            <div><div class="quick-link-title">Proton</div><div class="quick-link-url">proton.me</div></div>
-          </a>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-kicker">Focused Browsing</div>
-        <div class="panel-title">${persona?.name ?? 'Personal'} profile</div>
-        <div class="panel-subtitle">Your active persona keeps cookies, sessions, and local storage independent from every other workspace.</div>
-        <div class="focus-grid">
-          <div class="focus-card">
-            <div class="panel-kicker">Security</div>
-            <strong>HTTPS-first</strong>
-            <span>Warnings surface quickly when a page drops below modern defaults.</span>
-          </div>
-          <div class="focus-card">
-            <div class="panel-kicker">Isolation</div>
-            <strong>Session walls</strong>
-            <span>Each persona acts like a dedicated browser without the profile-switching drag.</span>
-          </div>
-        </div>
-      </div>
-    </section>
+    <div class="shortcuts">
+      <a class="shortcut" onclick="navigate('https://github.com')">
+        <div class="shortcut-icon">⌥</div>GitHub
+      </a>
+      <a class="shortcut" onclick="navigate('https://news.ycombinator.com')">
+        <div class="shortcut-icon">Y</div>HN
+      </a>
+      <a class="shortcut" onclick="navigate('https://reddit.com')">
+        <div class="shortcut-icon">R</div>Reddit
+      </a>
+      <a class="shortcut" onclick="navigate('https://youtube.com')">
+        <div class="shortcut-icon">▶</div>YouTube
+      </a>
+      <a class="shortcut" onclick="navigate('https://x.com')">
+        <div class="shortcut-icon">𝕏</div>X
+      </a>
+      <a class="shortcut" onclick="navigate('https://proton.me')">
+        <div class="shortcut-icon">✉</div>Proton
+      </a>
+    </div>
   </main>
   <script>
     function updateClock() {
@@ -481,26 +342,32 @@ class TabManager {
       const h = String(now.getHours()).padStart(2, '0');
       const m = String(now.getMinutes()).padStart(2, '0');
       const s = String(now.getSeconds()).padStart(2, '0');
-      document.getElementById('clock').textContent = h + ':' + m + ':' + s;
+      document.getElementById('clock').firstChild.textContent = h + ':' + m;
+      document.getElementById('secs').textContent = ':' + s;
       const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
       const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-      document.getElementById('date').textContent = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
+      document.getElementById('date').textContent = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate();
     }
     setInterval(updateClock, 1000);
     updateClock();
 
-    function navigate(url) {
-      window.location.href = url;
-    }
+    function navigate(url) { window.location.href = url; }
 
     document.getElementById('searchForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const query = document.getElementById('searchInput').value.trim();
       if (!query) return;
-      if (query.startsWith('http://') || query.startsWith('https://') || query.includes('.') && !query.includes(' ')) {
+      if (query.startsWith('http://') || query.startsWith('https://') || (query.includes('.') && !query.includes(' '))) {
         window.location.href = query.startsWith('http') ? query : 'https://' + query;
       } else {
         window.location.href = '${searchBase}' + encodeURIComponent(query);
+      }
+    });
+
+    document.addEventListener('keydown', function(e) {
+      const input = document.getElementById('searchInput');
+      if (document.activeElement !== input && !e.metaKey && !e.ctrlKey && e.key.length === 1) {
+        input.focus();
       }
     });
   </script>

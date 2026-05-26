@@ -1,15 +1,15 @@
 @import './themes.css';
 
 :root {
-  --tab-height: 42px;
-  --toolbar-height: 52px;
-  --sidebar-width: 280px;
-  --border-radius: 14px;
-  --border-radius-sm: 10px;
-  --border-radius-lg: 20px;
-  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --tab-height: 38px;
+  --toolbar-height: 48px;
+  --sidebar-width: 272px;
+  --border-radius: 12px;
+  --border-radius-sm: 8px;
+  --border-radius-lg: 18px;
+  --transition: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
   --font: 'SF Pro Display', 'Segoe UI Variable Text', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --accent-rgb: 233, 69, 96;
+  --accent-rgb: 99, 102, 241;
 }
 
 *, *::before, *::after {
@@ -110,8 +110,7 @@ a {
   height: 100vh;
   overflow: hidden;
   background:
-    radial-gradient(circle at top left, rgba(var(--accent-rgb), 0.18), transparent 28%),
-    radial-gradient(circle at 85% 10%, rgba(255, 255, 255, 0.08), transparent 18%),
+    radial-gradient(ellipse at top left, rgba(var(--accent-rgb), 0.1), transparent 40%),
     var(--bg-primary);
 }
 
