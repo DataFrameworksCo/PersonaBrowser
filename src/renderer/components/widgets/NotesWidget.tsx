@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import AppIcon from '../ui/AppIcon';
 
 const NotesWidget: React.FC = () => {
   const [notes, setNotes] = useState(() => {
@@ -18,27 +19,24 @@ const NotesWidget: React.FC = () => {
   }, [notes]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', height: '120px' }}>
+    <div className="widget-stack">
+      <div className="widget-panel">
+        <div className="widget-panel-row">
+          <div>
+            <div className="widget-kicker">Capture</div>
+            <div className="widget-title">Fast notes</div>
+          </div>
+          <span className="widget-pill">
+            <AppIcon name="note" size={12} />
+            Local
+          </span>
+        </div>
+      </div>
       <textarea
+        className="widget-textarea"
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
         placeholder="Quick notes..."
-        style={{
-          flex: 1,
-          background: 'var(--input-bg)',
-          border: '1px solid var(--border)',
-          borderRadius: '6px',
-          padding: '8px',
-          color: 'var(--text-primary)',
-          fontSize: '12px',
-          resize: 'none',
-          lineHeight: 1.5,
-          outline: 'none',
-          fontFamily: 'var(--font)',
-          transition: 'border-color var(--transition)',
-        }}
-        onFocus={(e) => e.target.style.borderColor = 'var(--accent)'}
-        onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
       />
     </div>
   );

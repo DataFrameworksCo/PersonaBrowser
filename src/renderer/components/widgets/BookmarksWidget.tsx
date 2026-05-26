@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useBrowser } from '../../contexts/BrowserContext';
+import AppIcon from '../ui/AppIcon';
 
 interface Bookmark {
   id: string;
@@ -55,96 +56,70 @@ const BookmarksWidget: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+    <div className="widget-stack">
+      <div className="widget-panel">
+        <div className="widget-panel-row">
+          <div>
+            <div className="widget-kicker">Launchpad</div>
+            <div className="widget-title">Favorite destinations</div>
+          </div>
+          <span className="widget-pill">
+            <AppIcon name="bookmark" size={12} />
+            {bookmarks.length}
+          </span>
+        </div>
+      </div>
       {bookmarks.map((bm) => (
         <div
           key={bm.id}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '5px 6px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            transition: 'background var(--transition)',
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--tab-active-bg)')}
-          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+          className="widget-bookmark-row"
           onClick={() => navigateTo(bm.url)}
         >
-          <span style={{ fontSize: '13px' }}>🔖</span>
-          <span style={{ flex: 1, fontSize: '12px', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {bm.title}
-          </span>
+          <div className="widget-bookmark-icon"><AppIcon name="bookmark" size={14} /></div>
+          <div className="widget-bookmark-meta">
+            <div className="widget-bookmark-title">{bm.title}</div>
+            <div className="widget-bookmark-url">{bm.url.replace(/^https?:\/\//, '')}</div>
+          </div>
           <button
+            className="widget-icon-button"
             onClick={(e) => { e.stopPropagation(); removeBookmark(bm.id); }}
-            style={{ fontSize: '10px', color: 'var(--text-muted)', opacity: 0, transition: 'opacity var(--transition)' }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = '0')}
           >
-            ✕
+            <AppIcon name="x" size={12} />
           </button>
         </div>
       ))}
 
       {showAdd ? (
-        <form onSubmit={addBookmark} style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
+        <form onSubmit={addBookmark} className="widget-stack">
           <input
+            className="widget-input"
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             placeholder="Title"
             autoFocus
-            style={{
-              background: 'var(--input-bg)',
-              border: '1px solid var(--border)',
-              borderRadius: '4px',
-              padding: '4px 8px',
-              color: 'var(--text-primary)',
-              fontSize: '12px',
-              outline: 'none',
-            }}
           />
           <input
+            className="widget-input"
             value={newUrl}
             onChange={(e) => setNewUrl(e.target.value)}
             placeholder="URL"
-            style={{
-              background: 'var(--input-bg)',
-              border: '1px solid var(--border)',
-              borderRadius: '4px',
-              padding: '4px 8px',
-              color: 'var(--text-primary)',
-              fontSize: '12px',
-              outline: 'none',
-            }}
           />
-          <div style={{ display: 'flex', gap: '4px' }}>
-            <button type="submit" style={{ flex: 1, padding: '4px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}>
+          <div className="widget-grid-2">
+            <button type="submit" className="widget-button">
               Add
             </button>
-            <button type="button" onClick={() => setShowAdd(false)} style={{ padding: '4px 8px', background: 'var(--tab-bg)', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}>
+            <button type="button" className="widget-button secondary" onClick={() => setShowAdd(false)}>
               Cancel
             </button>
           </div>
         </form>
       ) : (
         <button
+          className="widget-button secondary"
           onClick={() => setShowAdd(true)}
-          style={{
-            padding: '5px',
-            borderRadius: '6px',
-            border: '1px dashed var(--border)',
-            color: 'var(--text-muted)',
-            fontSize: '11px',
-            cursor: 'pointer',
-            background: 'transparent',
-            marginTop: '2px',
-            transition: 'all var(--transition)',
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
         >
-          + Add Bookmark
+          <AppIcon name="plus" size={14} />
+          Add Bookmark
         </button>
       )}
     </div>

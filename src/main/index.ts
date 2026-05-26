@@ -5,6 +5,9 @@ import { createMainWindow } from './window';
 import { tabManager } from './tab-manager';
 import { personaManager } from './persona-manager';
 import { settingsManager } from './settings-manager';
+import { extensionManager } from './extension-manager';
+import { historyManager } from './history-manager';
+import { downloadManager } from './download-manager';
 import { Tab, Widget, UpdateState } from '../shared/types';
 
 let mainWindow: BrowserWindow | null = null;
@@ -42,6 +45,55 @@ function setupIpcHandlers(): void {
 
   ipcMain.handle('tab:list', () => {
     return tabManager.getTabs();
+  });
+
+  ipcMain.handle('extension:list', () => {
+    return extensionManager.getInstalledExtensions();
+  });
+
+  ipcMain.handle('history:get', () => {
+    return historyManager.getEntries();
+  });
+
+  ipcMain.handle('history:remove', (_event, { entryId }: { entryId: string }) => {
+    return historyManager.removeEntry(entryId);
+  });
+
+  ipcMain.handle('history:clear', () => {
+    return historyManager.clear();
+  });
+
+  ipcMain.handle('downloads:get', () => {
+    return downloadManager.getDownloads();
+  });
+
+  ipcMain.handle('downloads:open', async (_event, { downloadId }: { downloadId: string }) => {
+    await downloadManager.openDownload(downloadId);
+  });
+
+  ipcMain.handle('downloads:reveal', (_event, { downloadId }: { downloadId: string }) => {
+    downloadManager.revealDownload(downloadId);
+  });
+
+  ipcMain.handle('downloads:clear', () => {
+    return downloadManager.clearDownloads();
+  });
+
+  ipcMain.handle('extension:install', async () => {
+    if (!mainWindow) throw new Error('Main window is not available.');
+    return extensionManager.installFromDialog(mainWindow);
+  });
+
+  ipcMain.handle('extension:set-enabled', async (_event, { extensionId, enabled }: { extensionId: string; enabled: boolean }) => {
+    return extensionManager.setEnabled(extensionId, enabled);
+  });
+
+  ipcMain.handle('extension:remove', async (_event, { extensionId }: { extensionId: string }) => {
+    return extensionManager.remove(extensionId);
+  });
+
+  ipcMain.handle('extension:reveal', async (_event, { extensionId }: { extensionId: string }) => {
+    return extensionManager.revealInFolder(extensionId);
   });
 
   // ─── Persona handlers ──────────────────────────────────────────────────────
@@ -166,6 +218,12 @@ function setupTabCallbacks(): void {
   );
 }
 
+function setupDownloadCallbacks(): void {
+  downloadManager.setOnChanged((downloads) => {
+    mainWindow?.webContents.send('downloads:changed', downloads);
+  });
+}
+
 function setupAutoUpdater(): void {
   const updateUrl = getConfiguredUpdateUrl();
   if (!updateUrl) return;
@@ -236,6 +294,7 @@ app.whenReady().then(async () => {
 
   mainWindow = createMainWindow();
   tabManager.setMainWindow(mainWindow);
+  setupDownloadCallbacks();
   setupTabCallbacks();
 
   // Create initial tab

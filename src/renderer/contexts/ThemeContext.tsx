@@ -15,6 +15,16 @@ const ThemeContext = createContext<ThemeContextValue>({
   setAccentColor: () => {},
 });
 
+const hexToRgb = (hex: string) => {
+  const normalized = hex.replace('#', '');
+  if (normalized.length !== 6) return '233, 69, 96';
+  const numericValue = Number.parseInt(normalized, 16);
+  const r = (numericValue >> 16) & 255;
+  const g = (numericValue >> 8) & 255;
+  const b = numericValue & 255;
+  return `${r}, ${g}, ${b}`;
+};
+
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>('dark');
   const [accentColor, setAccentColorState] = useState('#e94560');
@@ -32,6 +42,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     document.documentElement.style.setProperty('--accent', accentColor);
+    document.documentElement.style.setProperty('--accent-rgb', hexToRgb(accentColor));
   }, [accentColor]);
 
   const setTheme = useCallback((newTheme: Theme) => {

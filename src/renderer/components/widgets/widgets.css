@@ -1,0 +1,311 @@
+.widget-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.widget-panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.widget-panel-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.widget-kicker {
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.widget-title {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.widget-subtitle {
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.widget-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.widget-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.widget-input,
+.widget-textarea {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: var(--font);
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.widget-input {
+  padding: 10px 12px;
+}
+
+.widget-textarea {
+  min-height: 118px;
+  padding: 10px 12px;
+  resize: none;
+  line-height: 1.5;
+}
+
+.widget-input:focus,
+.widget-textarea:focus {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.widget-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: linear-gradient(135deg, var(--accent), rgba(var(--accent-rgb), 0.82));
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  transition: transform var(--transition), opacity var(--transition), border-color var(--transition), background var(--transition);
+}
+
+.widget-button:hover {
+  opacity: 0.92;
+}
+
+.widget-button:active {
+  transform: translateY(1px);
+}
+
+.widget-button.secondary {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+.widget-button.secondary:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+  opacity: 1;
+}
+
+.widget-todo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.widget-todo-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid transparent;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.widget-todo-item:hover {
+  border-color: var(--border);
+}
+
+.widget-todo-check {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1px solid var(--border-hover);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+.widget-todo-item.done .widget-todo-check {
+  background: rgba(var(--accent-rgb), 0.18);
+  border-color: rgba(var(--accent-rgb), 0.36);
+  color: var(--accent);
+}
+
+.widget-todo-text {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text-primary);
+  line-height: 1.45;
+}
+
+.widget-todo-item.done .widget-todo-text {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.widget-icon-button {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  background: transparent;
+  transition: background var(--transition), color var(--transition);
+}
+
+.widget-icon-button:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+}
+
+.widget-progress-ring {
+  --progress: 0.68;
+  width: 118px;
+  height: 118px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at center, var(--bg-secondary) 54%, transparent 55%),
+    conic-gradient(var(--accent) calc(var(--progress) * 1turn), rgba(255, 255, 255, 0.08) 0);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.widget-progress-core {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  gap: 3px;
+}
+
+.widget-progress-time {
+  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.widget-progress-label {
+  color: var(--text-secondary);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.widget-keypad {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.widget-key {
+  min-height: 38px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  transition: background var(--transition), border-color var(--transition), transform var(--transition);
+}
+
+.widget-key:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-hover);
+}
+
+.widget-key:active {
+  transform: translateY(1px);
+}
+
+.widget-key.operator {
+  color: var(--accent);
+}
+
+.widget-key.equals {
+  background: linear-gradient(135deg, var(--accent), rgba(var(--accent-rgb), 0.82));
+  border-color: transparent;
+  color: white;
+}
+
+.widget-bookmark-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  color: var(--text-primary);
+  transition: background var(--transition), border-color var(--transition);
+  border: 1px solid transparent;
+}
+
+.widget-bookmark-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--border);
+}
+
+.widget-bookmark-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: rgba(var(--accent-rgb), 0.12);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.widget-bookmark-meta {
+  min-width: 0;
+  flex: 1;
+}
+
+.widget-bookmark-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.widget-bookmark-url {
+  font-size: 10px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 2px;
+}

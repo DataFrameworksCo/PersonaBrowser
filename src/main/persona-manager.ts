@@ -1,6 +1,8 @@
 import { session, Session } from 'electron';
 import { Persona } from '../shared/types';
 import { settingsManager } from './settings-manager';
+import { extensionManager } from './extension-manager';
+import { downloadManager } from './download-manager';
 
 class PersonaManager {
   private sessionCache: Map<string, Session> = new Map();
@@ -22,6 +24,8 @@ class PersonaManager {
     }
 
     this.configureSession(newSession);
+    downloadManager.registerSession(newSession, personaId);
+    extensionManager.registerSession(newSession, !!persona?.isPersistent || !persona);
     this.sessionCache.set(personaId, newSession);
     return newSession;
   }

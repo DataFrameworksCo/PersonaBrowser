@@ -1,15 +1,28 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useBrowser } from '../../contexts/BrowserContext';
 import { usePersona } from '../../contexts/PersonaContext';
+import AppIcon from '../ui/AppIcon';
 import './Toolbar.css';
 
 interface ToolbarProps {
   onOpenSettings: () => void;
+  onOpenExtensions: () => void;
+  onOpenCommandCenter: () => void;
+  onOpenHistory: () => void;
+  onOpenDownloads: () => void;
   onTogglePersonaSwitcher: () => void;
   onToggleSidebar: () => void;
 }
 
-const Toolbar: React.FC<ToolbarProps> = ({ onOpenSettings, onTogglePersonaSwitcher, onToggleSidebar }) => {
+const Toolbar: React.FC<ToolbarProps> = ({
+  onOpenSettings,
+  onOpenExtensions,
+  onOpenCommandCenter,
+  onOpenHistory,
+  onOpenDownloads,
+  onTogglePersonaSwitcher,
+  onToggleSidebar,
+}) => {
   const {
     activeTab,
     addressValue,
@@ -26,6 +39,9 @@ const Toolbar: React.FC<ToolbarProps> = ({ onOpenSettings, onTogglePersonaSwitch
 
   const isSecure = activeTab?.url?.startsWith('https://') ?? false;
   const isLoading = activeTab?.isLoading ?? false;
+  const activeHost = activeTab?.url?.startsWith('http')
+    ? new URL(activeTab.url).hostname.replace(/^www\./, '')
+    : 'Start page';
 
   const getPrivacyScore = (): { score: number; level: 'high' | 'medium' | 'low' } => {
     if (!activeTab?.url || activeTab.url.startsWith('data:')) return { score: 100, level: 'high' };
@@ -67,7 +83,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ onOpenSettings, onTogglePersonaSwitch
           disabled={!activeTab?.canGoBack}
           title="Back"
         >
-          ←
+          <AppIcon name="arrow-left" size={15} />
         </button>
         <button
           className="toolbar-btn"
@@ -75,21 +91,21 @@ const Toolbar: React.FC<ToolbarProps> = ({ onOpenSettings, onTogglePersonaSwitch
           disabled={!activeTab?.canGoForward}
           title="Forward"
         >
-          →
+          <AppIcon name="arrow-right" size={15} />
         </button>
         <button
           className="toolbar-btn"
           onClick={reload}
           title={isLoading ? 'Stop' : 'Reload'}
         >
-          {isLoading ? '✕' : '⟳'}
+          <AppIcon name={isLoading ? 'x' : 'refresh'} size={15} />
         </button>
       </div>
 
       <form onSubmit={handleSubmit} style={{ flex: 1, display: 'flex', minWidth: 0 }}>
         <div className="toolbar-address-bar">
           <span className={`toolbar-lock-icon ${isSecure ? 'secure' : ''}`}>
-            {isSecure ? '🔒' : '⚠️'}
+            <AppIcon name={isSecure ? 'shield-check' : 'shield-alert'} size={14} />
           </span>
           <input
             ref={inputRef}
@@ -105,13 +121,31 @@ const Toolbar: React.FC<ToolbarProps> = ({ onOpenSettings, onTogglePersonaSwitch
           />
           {activeTab?.url && !activeTab.url.startsWith('data:') && !isFocused && (
             <span className={`toolbar-privacy-score ${level}`} title={`Privacy score: ${score}`}>
-              {score}
+              <span>{score}</span>
+              <span className="toolbar-privacy-score-label">{isSecure ? 'Secure' : 'Watch'}</span>
             </span>
           )}
         </div>
       </form>
 
       <div className="toolbar-right">
+        <button className="toolbar-btn" onClick={onOpenCommandCenter} title="Command center">
+          <AppIcon name="search" size={15} />
+        </button>
+
+        <button className="toolbar-btn" onClick={onOpenHistory} title="History">
+          <AppIcon name="history" size={15} />
+        </button>
+
+        <button className="toolbar-btn" onClick={onOpenDownloads} title="Downloads">
+          <AppIcon name="download" size={15} />
+        </button>
+
+        <div className="toolbar-site-chip" title={activeTab?.url ?? 'Start page'}>
+          <AppIcon name="globe" size={13} />
+          <span>{activeHost}</span>
+        </div>
+
         <button
           className="toolbar-persona-badge"
           onClick={onTogglePersonaSwitcher}
@@ -122,16 +156,20 @@ const Toolbar: React.FC<ToolbarProps> = ({ onOpenSettings, onTogglePersonaSwitch
             className="toolbar-persona-dot"
             style={{ background: activePersona?.color ?? '#808080' }}
           />
-          <span>{activePersona?.icon ?? '🌐'}</span>
+          <span className="toolbar-persona-symbol">{activePersona?.icon ?? '◌'}</span>
           <span>{activePersona?.name ?? 'Personal'}</span>
         </button>
 
         <button className="toolbar-btn" onClick={onToggleSidebar} title="Toggle sidebar">
-          ▤
+          <AppIcon name="sidebar" size={15} />
+        </button>
+
+        <button className="toolbar-btn" onClick={onOpenExtensions} title="Extensions">
+          <AppIcon name="layout" size={15} />
         </button>
 
         <button className="toolbar-btn" onClick={onOpenSettings} title="Settings">
-          ⚙
+          <AppIcon name="settings" size={15} />
         </button>
       </div>
     </div>

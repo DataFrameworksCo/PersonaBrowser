@@ -6,10 +6,14 @@ import PersonaSwitcher from './components/PersonaSwitcher/PersonaSwitcher';
 import Settings from './components/Settings/Settings';
 import WidgetStore from './components/WidgetStore/WidgetStore';
 import ExtensionStore from './components/ExtensionStore/ExtensionStore';
+import CommandCenter from './components/CommandCenter/CommandCenter';
+import HistoryPanel from './components/HistoryPanel/HistoryPanel';
+import DownloadsPanel from './components/DownloadsPanel/DownloadsPanel';
+import AppIcon from './components/ui/AppIcon';
 import { useBrowser } from './contexts/BrowserContext';
 import { UpdateState } from '../shared/types';
 
-type OverlayPage = 'settings' | 'widget-store' | 'extension-store' | null;
+type OverlayPage = 'settings' | 'widget-store' | 'extension-store' | 'command-center' | 'history' | 'downloads' | null;
 
 const App: React.FC = () => {
   const [overlay, setOverlay] = useState<OverlayPage>(null);
@@ -92,77 +96,45 @@ const App: React.FC = () => {
   })();
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100vh',
-        overflow: 'hidden',
-        background: 'var(--bg-primary)',
-      }}
-    >
+    <div className="app-shell">
       {shouldShowUpdateBanner && updateState && (
-        <div style={{
-          background: 'var(--accent, #e94560)',
-          color: '#fff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 12,
-          padding: '6px 16px',
-          fontSize: 13,
-          zIndex: 9999,
-        }}>
-          <span>{updateMessage}</span>
+        <div className="update-banner">
+          <div className="update-banner-message">
+            <span className="update-banner-icon"><AppIcon name="sparkles" size={14} /></span>
+            <span>{updateMessage}</span>
+          </div>
           {updateState.status === 'downloaded' && (
             <button
               onClick={() => window.persona.installUpdate()}
-              style={{
-                background: 'rgba(255,255,255,0.2)',
-                border: '1px solid rgba(255,255,255,0.4)',
-                borderRadius: 4,
-                color: '#fff',
-                cursor: 'pointer',
-                padding: '3px 12px',
-                fontSize: 13,
-              }}
+              className="update-banner-action"
             >
               Install Now
             </button>
           )}
           <button
             onClick={() => setUpdateState(null)}
-            style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 16, lineHeight: 1 }}
+            className="update-banner-close"
           >
-            x
+            <AppIcon name="x" size={14} />
           </button>
         </div>
       )}
 
-      <TabBar />
-      <Toolbar
-        onOpenSettings={() => openOverlay('settings')}
-        onTogglePersonaSwitcher={() => showPersonaSwitcher ? closePersonaSwitcher() : openPersonaSwitcher()}
-        onToggleSidebar={handleToggleSidebar}
-      />
-
-      <div
-        style={{
-          display: 'flex',
-          flex: 1,
-          overflow: 'hidden',
-          position: 'relative',
-        }}
-      >
-        <div
-          id="web-content-placeholder"
-          style={{
-            flex: 1,
-            background: 'var(--bg-primary)',
-            position: 'relative',
-            overflow: 'hidden',
-          }}
+      <div className="app-chrome">
+        <TabBar />
+        <Toolbar
+          onOpenSettings={() => openOverlay('settings')}
+          onOpenExtensions={() => openOverlay('extension-store')}
+          onOpenCommandCenter={() => openOverlay('command-center')}
+          onOpenHistory={() => openOverlay('history')}
+          onOpenDownloads={() => openOverlay('downloads')}
+          onTogglePersonaSwitcher={() => showPersonaSwitcher ? closePersonaSwitcher() : openPersonaSwitcher()}
+          onToggleSidebar={handleToggleSidebar}
         />
+      </div>
+
+      <div className="app-content">
+        <div id="web-content-placeholder" className="web-content-surface" />
 
         <Sidebar onOpenWidgetStore={() => openOverlay('widget-store')} />
       </div>
@@ -181,6 +153,18 @@ const App: React.FC = () => {
 
       {overlay === 'extension-store' && (
         <ExtensionStore onClose={closeOverlay} />
+      )}
+
+      {overlay === 'command-center' && (
+        <CommandCenter onClose={closeOverlay} />
+      )}
+
+      {overlay === 'history' && (
+        <HistoryPanel onClose={closeOverlay} />
+      )}
+
+      {overlay === 'downloads' && (
+        <DownloadsPanel onClose={closeOverlay} />
       )}
     </div>
   );

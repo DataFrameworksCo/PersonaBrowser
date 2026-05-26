@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { usePersona } from '../../contexts/PersonaContext';
 import { useBrowser } from '../../contexts/BrowserContext';
+import AppIcon from '../ui/AppIcon';
 import './PersonaSwitcher.css';
 
 const PERSONA_ICONS = ['💼', '🏠', '🎮', '🕵️', '🎨', '📚', '🏋️', '🎵', '🌍', '🔬', '💰', '🛒'];
@@ -44,7 +45,7 @@ const PersonaSwitcher: React.FC<Props> = ({ onClose }) => {
       <div className="persona-switcher-panel">
         <div className="persona-switcher-header">
           <span className="persona-switcher-title">Personas</span>
-          <button className="persona-switcher-close" onClick={onClose}>✕</button>
+          <button className="persona-switcher-close" onClick={onClose}><AppIcon name="x" size={14} /></button>
         </div>
 
         <div className="persona-list">
@@ -83,7 +84,7 @@ const PersonaSwitcher: React.FC<Props> = ({ onClose }) => {
                   onClick={(e) => handleDelete(e, persona.id)}
                   title="Delete persona"
                 >
-                  🗑
+                  <AppIcon name="trash" size={12} />
                 </button>
               )}
             </div>
@@ -93,7 +94,7 @@ const PersonaSwitcher: React.FC<Props> = ({ onClose }) => {
         <div className="persona-switcher-footer">
           {!showForm ? (
             <button className="persona-add-btn" onClick={() => setShowForm(true)}>
-              <span>+</span> New Persona
+              <AppIcon name="plus" size={14} /> New Persona
             </button>
           ) : (
             <form className="persona-form" onSubmit={handleCreate}>

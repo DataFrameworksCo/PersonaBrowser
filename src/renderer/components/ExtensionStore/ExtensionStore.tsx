@@ -1,4 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { Extension } from '../../../shared/types';
+import { useBrowser } from '../../contexts/BrowserContext';
+import AppIcon from '../ui/AppIcon';
 import './ExtensionStore.css';
 
 interface Props {
@@ -91,10 +94,47 @@ const FEATURED_EXTENSIONS: ExtensionDef[] = [
 ];
 
 const ExtensionStore: React.FC<Props> = ({ onClose }) => {
-  const handleOpenStore = (url?: string) => {
+  const { createTab } = useBrowser();
+  const [installedExtensions, setInstalledExtensions] = useState<Extension[]>([]);
+  const [busyExtensionId, setBusyExtensionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    window.persona.getInstalledExtensions().then(setInstalledExtensions);
+  }, []);
+
+  const handleOpenStore = async (url?: string) => {
     if (url) {
-      window.persona.navigateTo('', url);
+      await createTab(undefined, url);
       onClose();
+    }
+  };
+
+  const installExtension = async () => {
+    try {
+      const installed = await window.persona.installExtension();
+      setInstalledExtensions((current) => [...current.filter((entry) => entry.id !== installed.id), installed]);
+    } catch {
+      // ignore canceled installs
+    }
+  };
+
+  const setEnabled = async (extensionId: string, enabled: boolean) => {
+    setBusyExtensionId(extensionId);
+    try {
+      const nextInstalled = await window.persona.setExtensionEnabled(extensionId, enabled);
+      setInstalledExtensions(nextInstalled);
+    } finally {
+      setBusyExtensionId(null);
+    }
+  };
+
+  const removeExtension = async (extensionId: string) => {
+    setBusyExtensionId(extensionId);
+    try {
+      const nextInstalled = await window.persona.removeExtension(extensionId);
+      setInstalledExtensions(nextInstalled);
+    } finally {
+      setBusyExtensionId(null);
     }
   };
 
@@ -104,12 +144,67 @@ const ExtensionStore: React.FC<Props> = ({ onClose }) => {
   return (
     <div className="ext-store-overlay">
       <div className="ext-store-header">
-        <button className="ext-store-back" onClick={onClose}>←</button>
+        <button className="ext-store-back" onClick={onClose}><AppIcon name="chevron-left" size={16} /></button>
         <span className="ext-store-title">Extension Store</span>
+        <button className="ext-load-btn" onClick={installExtension}>
+          <AppIcon name="plus" size={14} />
+          Load Unpacked
+        </button>
       </div>
       <div className="ext-store-content">
         <div className="ext-store-notice">
-          <strong>Note:</strong> Extensions open the Chrome Web Store in a new tab. Electron-based browsers have limited extension support compared to Chrome — extensions that rely on Chrome-specific APIs may not work fully. Privacy extensions like uBlock Origin work best.
+          <strong>Note:</strong> Persona Browser now supports loading unpacked Chromium extensions into persistent personas. Chrome Web Store links are still useful for discovery, but install by downloading an unpacked extension folder and using <em>Load Unpacked</em>.
+        </div>
+
+        <div className="ext-section-title">Installed Extensions</div>
+        <div className="ext-grid">
+          {installedExtensions.length === 0 && (
+            <div className="ext-empty-state">
+              <div className="ext-empty-icon"><AppIcon name="layout" size={24} /></div>
+              <div className="ext-empty-title">No extensions loaded yet</div>
+              <div className="ext-empty-copy">Load unpacked extensions to enable blockers, password managers, and productivity tools in persistent personas.</div>
+            </div>
+          )}
+
+          {installedExtensions.map((extension) => (
+            <div key={extension.id} className="ext-card installed">
+              <div className="ext-card-icon">
+                {extension.icon ? <img src={extension.icon} alt="" className="ext-card-image" /> : extension.name.slice(0, 1)}
+              </div>
+              <div className="ext-card-body">
+                <div className="ext-card-name">{extension.name}</div>
+                <div className="ext-card-desc">{extension.description || 'Installed unpacked extension'}</div>
+                <div className="ext-card-footer">
+                  <span className="ext-card-version">v{extension.version}</span>
+                  <span className={`ext-card-state ${extension.enabled ? 'enabled' : 'disabled'}`}>
+                    {extension.enabled ? 'Enabled' : 'Disabled'}
+                  </span>
+                </div>
+                <div className="ext-card-actions">
+                  <button
+                    className="ext-card-btn store"
+                    onClick={() => setEnabled(extension.id, !extension.enabled)}
+                    disabled={busyExtensionId === extension.id}
+                  >
+                    {extension.enabled ? 'Disable' : 'Enable'}
+                  </button>
+                  <button
+                    className="ext-card-btn store"
+                    onClick={() => window.persona.revealExtensionInFolder(extension.id)}
+                  >
+                    Reveal Folder
+                  </button>
+                  <button
+                    className="ext-card-btn danger"
+                    onClick={() => removeExtension(extension.id)}
+                    disabled={busyExtensionId === extension.id}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
         <div className="ext-section-title">🛡️ Privacy & Security</div>

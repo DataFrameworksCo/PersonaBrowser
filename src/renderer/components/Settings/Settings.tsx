@@ -3,6 +3,7 @@ import { Theme, SearchEngine } from '../../../shared/types';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useBrowser } from '../../contexts/BrowserContext';
 import { usePersona } from '../../contexts/PersonaContext';
+import AppIcon, { IconName } from '../ui/AppIcon';
 import './Settings.css';
 
 interface SettingsProps {
@@ -43,12 +44,12 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
 
   if (!settings) return null;
 
-  const navItems: { id: SettingsTab; icon: string; label: string }[] = [
-    { id: 'appearance', icon: '🎨', label: 'Appearance' },
-    { id: 'privacy', icon: '🔒', label: 'Privacy & Security' },
-    { id: 'search', icon: '🔍', label: 'Search' },
-    { id: 'personas', icon: '👤', label: 'Personas' },
-    { id: 'about', icon: 'ℹ️', label: 'About' },
+  const navItems: { id: SettingsTab; icon: IconName; label: string }[] = [
+    { id: 'appearance', icon: 'palette', label: 'Appearance' },
+    { id: 'privacy', icon: 'lock', label: 'Privacy & Security' },
+    { id: 'search', icon: 'search', label: 'Search' },
+    { id: 'personas', icon: 'user', label: 'Personas' },
+    { id: 'about', icon: 'info', label: 'About' },
   ];
 
   const renderAppearance = () => (
@@ -303,7 +304,7 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
           <div className="settings-row-info">
             <div className="settings-row-label">Version</div>
           </div>
-          <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>1.0.0</span>
+          <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>1.1.0</span>
         </div>
         <div className="settings-row">
           <div className="settings-row-info">
@@ -334,7 +335,7 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
   return (
     <div className="settings-overlay">
       <div className="settings-header">
-        <button className="settings-back-btn" onClick={onClose}>←</button>
+        <button className="settings-back-btn" onClick={onClose}><AppIcon name="chevron-left" size={18} /></button>
         <span className="settings-header-title">Settings</span>
       </div>
       <div className="settings-body">
@@ -345,7 +346,7 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
               className={`settings-nav-item ${activeTab === item.id ? 'active' : ''}`}
               onClick={() => setActiveTab(item.id)}
             >
-              <span className="settings-nav-item-icon">{item.icon}</span>
+              <span className="settings-nav-item-icon"><AppIcon name={item.icon} size={16} /></span>
               {item.label}
             </div>
           ))}

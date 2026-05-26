@@ -1,26 +1,38 @@
 import React from 'react';
+import AppIcon from '../ui/AppIcon';
 
 const WeatherWidget: React.FC = () => {
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '8px',
-      padding: '8px 0',
-      color: 'var(--text-secondary)',
-    }}>
-      <div style={{ fontSize: '36px' }}>⛅</div>
-      <div style={{ fontSize: '22px', fontWeight: 300, color: 'var(--text-primary)' }}>--°</div>
-      <div style={{ fontSize: '11px', textAlign: 'center', lineHeight: 1.5 }}>
-        Add an API key in Settings<br />to enable weather
+    <div className="widget-stack">
+      <div className="widget-panel">
+        <div className="widget-panel-row">
+          <div>
+            <div className="widget-kicker">Ambient</div>
+            <div className="widget-title">Weather snapshot</div>
+          </div>
+          <span className="widget-pill">
+            <AppIcon name="cloud" size={12} />
+            Preview
+          </span>
+        </div>
       </div>
-      <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+      <div className="widget-panel" style={{ textAlign: 'center' }}>
+        <div style={{ display: 'grid', placeItems: 'center', marginBottom: 8 }}>
+          <div className="widget-bookmark-icon" style={{ width: 54, height: 54 }}>
+            <AppIcon name="cloud" size={24} />
+          </div>
+        </div>
+        <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)' }}>--°</div>
+        <div className="widget-subtitle" style={{ marginTop: 8 }}>
+          Add an API key in Settings to enable live conditions and forecast cards.
+        </div>
+      </div>
+      <div className="widget-grid-2">
         {['Mon', 'Tue', 'Wed', 'Thu'].map((day) => (
-          <div key={day} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-            <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{day}</span>
-            <span style={{ fontSize: '14px' }}>🌤</span>
-            <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>--°</span>
+          <div key={day} className="widget-panel" style={{ textAlign: 'center', padding: '10px' }}>
+            <div className="widget-kicker">{day}</div>
+            <div style={{ color: 'var(--accent)', margin: '6px 0' }}><AppIcon name="cloud" size={16} /></div>
+            <div className="widget-subtitle">--°</div>
           </div>
         ))}
       </div>

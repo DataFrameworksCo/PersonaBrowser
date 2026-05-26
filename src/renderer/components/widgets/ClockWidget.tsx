@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import AppIcon from '../ui/AppIcon';
 
 const ClockWidget: React.FC = () => {
   const [time, setTime] = useState(new Date());
@@ -15,24 +16,33 @@ const ClockWidget: React.FC = () => {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   return (
-    <div style={{ textAlign: 'center', padding: '8px 0' }}>
-      <div style={{
-        fontSize: '28px',
-        fontWeight: 200,
-        letterSpacing: '2px',
-        color: 'var(--text-primary)',
-        fontVariantNumeric: 'tabular-nums',
-        lineHeight: 1.2,
-      }}>
-        {h}:{m}<span style={{ opacity: 0.5, fontSize: '22px' }}>:{s}</span>
+    <div className="widget-stack">
+      <div className="widget-panel">
+        <div className="widget-panel-row">
+          <div>
+            <div className="widget-kicker">Now</div>
+            <div className="widget-title">Local time</div>
+          </div>
+          <span className="widget-pill">
+            <AppIcon name="clock" size={12} />
+            Live
+          </span>
+        </div>
       </div>
-      <div style={{
-        fontSize: '11px',
-        color: 'var(--text-muted)',
-        marginTop: '4px',
-        letterSpacing: '0.05em',
-      }}>
-        {days[time.getDay()]}, {months[time.getMonth()]} {time.getDate()}, {time.getFullYear()}
+      <div className="widget-panel" style={{ textAlign: 'center' }}>
+        <div style={{
+          fontSize: '30px',
+          fontWeight: 700,
+          letterSpacing: '-0.04em',
+          color: 'var(--text-primary)',
+          fontVariantNumeric: 'tabular-nums',
+          lineHeight: 1.1,
+        }}>
+          {h}:{m}<span style={{ opacity: 0.45, fontSize: '22px', marginLeft: 2 }}>:{s}</span>
+        </div>
+        <div className="widget-subtitle" style={{ marginTop: 8, letterSpacing: '0.04em' }}>
+          {days[time.getDay()]}, {months[time.getMonth()]} {time.getDate()}, {time.getFullYear()}
+        </div>
       </div>
     </div>
   );

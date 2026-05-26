@@ -1,14 +1,15 @@
 @import './themes.css';
 
 :root {
-  --tab-height: 36px;
-  --toolbar-height: 44px;
+  --tab-height: 42px;
+  --toolbar-height: 52px;
   --sidebar-width: 280px;
-  --border-radius: 8px;
-  --border-radius-sm: 4px;
-  --border-radius-lg: 12px;
+  --border-radius: 14px;
+  --border-radius-sm: 10px;
+  --border-radius-lg: 20px;
   --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Helvetica, Arial, sans-serif;
+  --font: 'SF Pro Display', 'Segoe UI Variable Text', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --accent-rgb: 233, 69, 96;
 }
 
 *, *::before, *::after {
@@ -31,6 +32,7 @@ body {
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 /* Scrollbars */
@@ -101,3 +103,85 @@ a {
 
 .fade-in { animation: fadeIn 0.2s ease forwards; }
 .slide-in { animation: slideIn 0.2s ease forwards; }
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top left, rgba(var(--accent-rgb), 0.18), transparent 28%),
+    radial-gradient(circle at 85% 10%, rgba(255, 255, 255, 0.08), transparent 18%),
+    var(--bg-primary);
+}
+
+.app-chrome {
+  position: relative;
+  z-index: 2;
+}
+
+.app-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  min-height: 0;
+}
+
+.web-content-surface {
+  flex: 1;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 22%),
+    var(--bg-primary);
+  position: relative;
+  overflow: hidden;
+}
+
+.update-banner {
+  background: linear-gradient(135deg, var(--accent), rgba(var(--accent-rgb), 0.82));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 18px;
+  font-size: 13px;
+  z-index: 10;
+  box-shadow: 0 8px 24px rgba(var(--accent-rgb), 0.24);
+}
+
+.update-banner-message {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.update-banner-icon {
+  display: inline-flex;
+  opacity: 0.9;
+}
+
+.update-banner-action,
+.update-banner-close {
+  color: white;
+}
+
+.update-banner-action {
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.update-banner-close {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+}

@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { Tab, Persona, Settings, Widget, PersonaAPI, UpdateState } from '../shared/types';
+import { Tab, Persona, Settings, Widget, PersonaAPI, UpdateState, DownloadRecord } from '../shared/types';
 
 const persona: PersonaAPI = {
   // Tabs
@@ -17,6 +17,30 @@ const persona: PersonaAPI = {
 
   getTabs: () =>
     ipcRenderer.invoke('tab:list'),
+
+  getInstalledExtensions: () =>
+    ipcRenderer.invoke('extension:list'),
+
+  getHistory: () =>
+    ipcRenderer.invoke('history:get'),
+
+  removeHistoryEntry: (entryId: string) =>
+    ipcRenderer.invoke('history:remove', { entryId }),
+
+  clearHistory: () =>
+    ipcRenderer.invoke('history:clear'),
+
+  getDownloads: () =>
+    ipcRenderer.invoke('downloads:get'),
+
+  openDownload: (downloadId: string) =>
+    ipcRenderer.invoke('downloads:open', { downloadId }),
+
+  revealDownload: (downloadId: string) =>
+    ipcRenderer.invoke('downloads:reveal', { downloadId }),
+
+  clearDownloads: () =>
+    ipcRenderer.invoke('downloads:clear'),
 
   // Personas
   createPersona: (name: string, color: string, icon: string) =>
@@ -71,6 +95,18 @@ const persona: PersonaAPI = {
   removeWidget: (widgetId: string) =>
     ipcRenderer.invoke('sidebar:remove-widget', { widgetId }),
 
+  installExtension: () =>
+    ipcRenderer.invoke('extension:install'),
+
+  setExtensionEnabled: (extensionId: string, enabled: boolean) =>
+    ipcRenderer.invoke('extension:set-enabled', { extensionId, enabled }),
+
+  removeExtension: (extensionId: string) =>
+    ipcRenderer.invoke('extension:remove', { extensionId }),
+
+  revealExtensionInFolder: (extensionId: string) =>
+    ipcRenderer.invoke('extension:reveal', { extensionId }),
+
   // Events
   onTabUpdated: (callback: (tab: Tab) => void) => {
     const listener = (_: Electron.IpcRendererEvent, tab: Tab) => callback(tab);
@@ -124,6 +160,12 @@ const persona: PersonaAPI = {
     const listener = (_: Electron.IpcRendererEvent, state: UpdateState) => callback(state);
     ipcRenderer.on('update:state-changed', listener);
     return () => ipcRenderer.removeListener('update:state-changed', listener);
+  },
+
+  onDownloadsChanged: (callback: (downloads: DownloadRecord[]) => void) => {
+    const listener = (_: Electron.IpcRendererEvent, downloads: DownloadRecord[]) => callback(downloads);
+    ipcRenderer.on('downloads:changed', listener);
+    return () => ipcRenderer.removeListener('downloads:changed', listener);
   },
 
   installUpdate: () => ipcRenderer.invoke('update:install'),

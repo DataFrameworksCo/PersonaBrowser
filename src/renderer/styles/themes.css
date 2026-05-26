@@ -1,41 +1,41 @@
 /* ── Dark Theme (default) ── */
 [data-theme="dark"] {
-  --bg-primary: #1a1a2e;
-  --bg-secondary: #16213e;
-  --bg-tertiary: #0f3460;
-  --bg-overlay: rgba(26, 26, 46, 0.95);
+  --bg-primary: #09111f;
+  --bg-secondary: rgba(16, 26, 43, 0.88);
+  --bg-tertiary: #16233a;
+  --bg-overlay: rgba(9, 17, 31, 0.94);
   --accent: #e94560;
-  --text-primary: #ffffff;
-  --text-secondary: #a0a0b0;
-  --text-muted: #606070;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(255, 255, 255, 0.16);
-  --tab-bg: rgba(255, 255, 255, 0.05);
-  --tab-active-bg: rgba(255, 255, 255, 0.12);
-  --input-bg: rgba(255, 255, 255, 0.07);
-  --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --text-primary: #f7f9ff;
+  --text-secondary: #a6b4ca;
+  --text-muted: #63728a;
+  --border: rgba(173, 196, 255, 0.08);
+  --border-hover: rgba(173, 196, 255, 0.16);
+  --tab-bg: rgba(255, 255, 255, 0.04);
+  --tab-active-bg: rgba(255, 255, 255, 0.09);
+  --input-bg: rgba(255, 255, 255, 0.06);
+  --shadow: 0 20px 45px rgba(1, 8, 22, 0.5);
   --glass: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+  --glass-border: rgba(173, 196, 255, 0.1);
+  --scrollbar-thumb: rgba(173, 196, 255, 0.18);
   --scrollbar-track: transparent;
 }
 
 /* ── Light Theme ── */
 [data-theme="light"] {
-  --bg-primary: #f5f5f7;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #e8e8ed;
-  --bg-overlay: rgba(245, 245, 247, 0.95);
+  --bg-primary: #eef2f7;
+  --bg-secondary: rgba(255, 255, 255, 0.86);
+  --bg-tertiary: #ffffff;
+  --bg-overlay: rgba(238, 242, 247, 0.94);
   --accent: #e94560;
-  --text-primary: #1d1d1f;
-  --text-secondary: #6e6e73;
-  --text-muted: #aeaeb2;
-  --border: rgba(0, 0, 0, 0.1);
-  --border-hover: rgba(0, 0, 0, 0.2);
+  --text-primary: #0f1726;
+  --text-secondary: #556278;
+  --text-muted: #8592a7;
+  --border: rgba(15, 23, 38, 0.08);
+  --border-hover: rgba(15, 23, 38, 0.16);
   --tab-bg: rgba(0, 0, 0, 0.04);
-  --tab-active-bg: rgba(0, 0, 0, 0.08);
+  --tab-active-bg: rgba(15, 23, 38, 0.08);
   --input-bg: rgba(0, 0, 0, 0.05);
-  --shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  --shadow: 0 18px 36px rgba(46, 63, 91, 0.12);
   --glass: rgba(0, 0, 0, 0.03);
   --glass-border: rgba(0, 0, 0, 0.1);
   --scrollbar-thumb: rgba(0, 0, 0, 0.15);
@@ -45,13 +45,13 @@
 /* ── Midnight Theme ── */
 [data-theme="midnight"] {
   --bg-primary: #050510;
-  --bg-secondary: #0a0a1a;
+  --bg-secondary: rgba(10, 10, 26, 0.9);
   --bg-tertiary: #0f0f28;
   --bg-overlay: rgba(5, 5, 16, 0.97);
   --accent: #7c6fff;
   --text-primary: #e8e8ff;
   --text-secondary: #8080a0;
-  --text-muted: #4040600;
+  --text-muted: #4d4d77;
   --border: rgba(120, 120, 200, 0.1);
   --border-hover: rgba(120, 120, 200, 0.2);
   --tab-bg: rgba(100, 100, 200, 0.05);
@@ -67,7 +67,7 @@
 /* ── Forest Theme ── */
 [data-theme="forest"] {
   --bg-primary: #0d1f0f;
-  --bg-secondary: #122415;
+  --bg-secondary: rgba(18, 36, 21, 0.9);
   --bg-tertiary: #183020;
   --bg-overlay: rgba(13, 31, 15, 0.96);
   --accent: #4ade80;
@@ -89,7 +89,7 @@
 /* ── Ocean Theme ── */
 [data-theme="ocean"] {
   --bg-primary: #041821;
-  --bg-secondary: #072535;
+  --bg-secondary: rgba(7, 37, 53, 0.9);
   --bg-tertiary: #0c3348;
   --bg-overlay: rgba(4, 24, 33, 0.96);
   --accent: #00d4ff;

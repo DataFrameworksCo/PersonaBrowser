@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Tab, Persona } from '../../../shared/types';
 import { useBrowser } from '../../contexts/BrowserContext';
 import { usePersona } from '../../contexts/PersonaContext';
+import AppIcon from '../ui/AppIcon';
 import './TabBar.css';
 
 interface TabItemProps {
@@ -28,7 +29,7 @@ const TabItem: React.FC<TabItemProps> = ({ tab, persona, onSwitch, onClose }) =>
         ) : tab.favicon ? (
           <img src={tab.favicon} alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
         ) : (
-          <span style={{ fontSize: 11 }}>🌐</span>
+          <AppIcon name="globe" size={12} />
         )}
       </div>
       <span className="tab-title">{tab.title || 'New Tab'}</span>
@@ -37,7 +38,7 @@ const TabItem: React.FC<TabItemProps> = ({ tab, persona, onSwitch, onClose }) =>
         onClick={onClose}
         title="Close tab"
       >
-        ✕
+        <AppIcon name="x" size={11} />
       </button>
     </div>
   );
@@ -84,17 +85,17 @@ const TabBar: React.FC = () => {
         })}
       </div>
       <button className="tab-new-btn no-drag" onClick={handleNewTab} title="New tab">
-        +
+        <AppIcon name="plus" size={15} />
       </button>
       <div className="window-controls no-drag">
         <button className="wc-btn wc-minimize" onClick={() => window.persona.minimizeWindow()} title="Minimize">
-          ─
+          <AppIcon name="minimize" size={12} />
         </button>
         <button className="wc-btn wc-maximize" onClick={handleMaximize} title={isMaximized ? 'Restore' : 'Maximize'}>
-          {isMaximized ? '❐' : '□'}
+          <AppIcon name={isMaximized ? 'restore' : 'maximize'} size={12} />
         </button>
         <button className="wc-btn wc-close" onClick={() => window.persona.closeWindow()} title="Close">
-          ✕
+          <AppIcon name="x" size={12} />
         </button>
       </div>
     </div>

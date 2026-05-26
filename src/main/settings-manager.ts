@@ -53,6 +53,9 @@ const DEFAULT_SETTINGS: Settings = {
   activePersonaId: 'personal',
   sidebarWidgets: DEFAULT_WIDGETS,
   sidebarOpen: true,
+  installedExtensions: [],
+  historyEntries: [],
+  downloadHistory: [],
   newTabUrl: 'persona://newtab',
   customAccentColors: {},
 };

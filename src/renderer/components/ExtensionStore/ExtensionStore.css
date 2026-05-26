@@ -43,6 +43,19 @@
   flex: 1;
 }
 
+.ext-load-btn {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--accent), rgba(var(--accent-rgb), 0.82));
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .ext-store-content {
   flex: 1;
   overflow-y: auto;
@@ -96,6 +109,10 @@
   align-items: flex-start;
 }
 
+.ext-card.installed {
+  border-color: rgba(var(--accent-rgb), 0.16);
+}
+
 .ext-card:hover {
   border-color: var(--border-hover);
 }
@@ -111,6 +128,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.ext-card-image {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 .ext-card-body {
@@ -136,6 +159,13 @@
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.ext-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .ext-card-version {
@@ -177,6 +207,12 @@
   color: var(--text-primary);
 }
 
+.ext-card-btn.danger {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
 .ext-card-privacy-badge {
   font-size: 10px;
   padding: 2px 6px;
@@ -184,4 +220,51 @@
   background: rgba(74, 222, 128, 0.12);
   color: #4ade80;
   border: 1px solid rgba(74, 222, 128, 0.2);
+}
+
+.ext-card-state {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.ext-card-state.enabled {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.2);
+}
+
+.ext-card-state.disabled {
+  color: var(--text-muted);
+}
+
+.ext-empty-state {
+  padding: 20px;
+  border-radius: 18px;
+  border: 1px dashed var(--border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ext-empty-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.ext-empty-title {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.ext-empty-copy {
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
+  margin-top: 8px;
 }

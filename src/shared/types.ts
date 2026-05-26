@@ -19,6 +19,40 @@ export interface Tab {
   isActive: boolean;
 }
 
+export interface ClosedTabEntry {
+  id: string;
+  url: string;
+  title: string;
+  favicon: string;
+  personaId: string;
+  closedAt: number;
+}
+
+export interface HistoryEntry {
+  id: string;
+  url: string;
+  title: string;
+  favicon: string;
+  personaId: string;
+  lastVisitedAt: number;
+  visitCount: number;
+}
+
+export type DownloadStatus = 'progressing' | 'completed' | 'interrupted' | 'cancelled';
+
+export interface DownloadRecord {
+  id: string;
+  url: string;
+  fileName: string;
+  status: DownloadStatus;
+  receivedBytes: number;
+  totalBytes: number;
+  savePath?: string;
+  personaId: string;
+  startedAt: number;
+  finishedAt?: number;
+}
+
 export interface Widget {
   id: string;
   type: WidgetType;
@@ -52,6 +86,7 @@ export interface Extension {
   version: string;
   icon: string;
   installed: boolean;
+  enabled: boolean;
   storeUrl?: string;
   localPath?: string;
 }
@@ -73,6 +108,9 @@ export interface Settings {
   activePersonaId: string;
   sidebarWidgets: Widget[];
   sidebarOpen: boolean;
+  installedExtensions: Extension[];
+  historyEntries: HistoryEntry[];
+  downloadHistory: DownloadRecord[];
   newTabUrl: string;
   customAccentColors: Record<string, string>;
 }
@@ -123,6 +161,14 @@ export interface PersonaAPI {
   switchTab: (tabId: string) => Promise<void>;
   navigateTo: (tabId: string, url: string) => Promise<void>;
   getTabs: () => Promise<Tab[]>;
+  getInstalledExtensions: () => Promise<Extension[]>;
+  getHistory: () => Promise<HistoryEntry[]>;
+  removeHistoryEntry: (entryId: string) => Promise<HistoryEntry[]>;
+  clearHistory: () => Promise<HistoryEntry[]>;
+  getDownloads: () => Promise<DownloadRecord[]>;
+  openDownload: (downloadId: string) => Promise<void>;
+  revealDownload: (downloadId: string) => Promise<void>;
+  clearDownloads: () => Promise<DownloadRecord[]>;
   // Personas
   createPersona: (name: string, color: string, icon: string) => Promise<Persona>;
   switchPersona: (personaId: string) => Promise<void>;
@@ -148,6 +194,10 @@ export interface PersonaAPI {
   toggleSidebar: () => Promise<boolean>;
   addWidget: (widget: Widget) => Promise<void>;
   removeWidget: (widgetId: string) => Promise<void>;
+  installExtension: () => Promise<Extension>;
+  setExtensionEnabled: (extensionId: string, enabled: boolean) => Promise<Extension[]>;
+  removeExtension: (extensionId: string) => Promise<Extension[]>;
+  revealExtensionInFolder: (extensionId: string) => Promise<void>;
   // Events
   onTabUpdated: (callback: (tab: Tab) => void) => () => void;
   onTabCreated: (callback: (tab: Tab) => void) => () => void;
@@ -158,6 +208,7 @@ export interface PersonaAPI {
   onLoadingChanged: (callback: (data: { tabId: string; isLoading: boolean }) => void) => () => void;
   onNavigationChanged: (callback: (data: { tabId: string; canGoBack: boolean; canGoForward: boolean }) => void) => () => void;
   onUpdateStateChanged: (callback: (state: UpdateState) => void) => () => void;
+  onDownloadsChanged: (callback: (downloads: DownloadRecord[]) => void) => () => void;
   installUpdate: () => Promise<void>;
 }
 

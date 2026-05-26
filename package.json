@@ -1,6 +1,6 @@
 {
   "name": "persona-browser",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Privacy-focused Chromium browser with persona isolation",
   "author": {
     "name": "Seth Floyd",

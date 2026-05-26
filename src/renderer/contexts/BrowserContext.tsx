@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { Tab, Settings, Widget } from '../../shared/types';
+import { Tab, Settings, Widget, ClosedTabEntry } from '../../shared/types';
 
 interface BrowserContextValue {
   tabs: Tab[];
@@ -7,11 +7,14 @@ interface BrowserContextValue {
   activeTabId: string | null;
   settings: Settings | null;
   sidebarOpen: boolean;
+  recentClosedTabs: ClosedTabEntry[];
   addressValue: string;
   setAddressValue: (v: string) => void;
   createTab: (personaId?: string, url?: string) => Promise<void>;
   closeTab: (tabId: string) => void;
   switchTab: (tabId: string) => Promise<void>;
+  duplicateTab: (tabId: string) => Promise<void>;
+  reopenClosedTab: () => Promise<void>;
   navigateTo: (url: string) => void;
   goBack: () => void;
   goForward: () => void;
@@ -29,9 +32,32 @@ export const BrowserProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [recentClosedTabs, setRecentClosedTabs] = useState<ClosedTabEntry[]>([]);
   const [addressValue, setAddressValue] = useState('');
+  const tabsRef = useRef<Tab[]>([]);
   const activeTabId = tabs.find((t) => t.isActive)?.id ?? null;
   const activeTab = tabs.find((t) => t.isActive) ?? null;
+
+  useEffect(() => {
+    tabsRef.current = tabs;
+  }, [tabs]);
+
+  const captureClosedTab = useCallback((tabToClose: Tab | undefined) => {
+    if (!tabToClose) return;
+    if (tabToClose.url.startsWith('data:')) return;
+
+    setRecentClosedTabs((current) => [
+      {
+        id: tabToClose.id,
+        url: tabToClose.url,
+        title: tabToClose.title,
+        favicon: tabToClose.favicon,
+        personaId: tabToClose.personaId,
+        closedAt: Date.now(),
+      },
+      ...current.filter((entry) => entry.id !== tabToClose.id),
+    ].slice(0, 8));
+  }, []);
 
   const refreshSettings = useCallback(async () => {
     const s = await window.persona.getSettings();
@@ -68,6 +94,8 @@ export const BrowserProvider: React.FC<{ children: React.ReactNode }> = ({ child
     });
 
     const unsubClosed = window.persona.onTabClosed((tabId) => {
+      const closedTab = tabsRef.current.find((tab) => tab.id === tabId);
+      captureClosedTab(closedTab);
       setTabs((prev) => prev.filter((t) => t.id !== tabId));
     });
 
@@ -76,7 +104,7 @@ export const BrowserProvider: React.FC<{ children: React.ReactNode }> = ({ child
       unsubCreated();
       unsubClosed();
     };
-  }, [refreshSettings]);
+  }, [captureClosedTab, refreshSettings]);
 
   // Keep address bar synced with active tab URL
   useEffect(() => {
@@ -90,8 +118,9 @@ export const BrowserProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const closeTab = useCallback((tabId: string) => {
+    captureClosedTab(tabsRef.current.find((tab) => tab.id === tabId));
     window.persona.closeTab(tabId);
-  }, []);
+  }, [captureClosedTab]);
 
   const switchTab = useCallback(async (tabId: string) => {
     await window.persona.switchTab(tabId);
@@ -106,6 +135,19 @@ export const BrowserProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (!activeTabId) return;
     window.persona.navigateTo(activeTabId, url);
   }, [activeTabId]);
+
+  const duplicateTab = useCallback(async (tabId: string) => {
+    const target = tabsRef.current.find((tab) => tab.id === tabId);
+    if (!target) return;
+    await createTab(target.personaId, target.url === 'persona://newtab' ? undefined : target.url);
+  }, [createTab]);
+
+  const reopenClosedTab = useCallback(async () => {
+    const nextClosed = recentClosedTabs[0];
+    if (!nextClosed) return;
+    await createTab(nextClosed.personaId, nextClosed.url === 'persona://newtab' ? undefined : nextClosed.url);
+    setRecentClosedTabs((current) => current.slice(1));
+  }, [createTab, recentClosedTabs]);
 
   const goBack = useCallback(() => {
     if (!activeTabId) return;
@@ -152,11 +194,14 @@ export const BrowserProvider: React.FC<{ children: React.ReactNode }> = ({ child
         activeTabId,
         settings,
         sidebarOpen,
+        recentClosedTabs,
         addressValue,
         setAddressValue,
         createTab,
         closeTab,
         switchTab,
+        duplicateTab,
+        reopenClosedTab,
         navigateTo,
         goBack,
         goForward,
