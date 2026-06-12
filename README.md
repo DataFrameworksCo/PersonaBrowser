@@ -4,13 +4,8 @@ Privacy-focused Chromium browser with persona isolation.
 
 ## Downloads
 
-- macOS `.dmg`: [Download Persona Browser for macOS](https://github.com/DataFrameworksCo/PersonaBrowser/releases/download/v1.1.0/PersonaBrowser-1.1.0-universal.dmg)
-- Windows `.exe`: [Download Persona Browser for Windows](https://github.com/DataFrameworksCo/PersonaBrowser/releases/download/v1.1.0/PersonaBrowser-Setup-1.1.0.exe)
-- Full release page: [v1.1.0](https://github.com/DataFrameworksCo/PersonaBrowser/releases/tag/v1.1.0)
-
-## Release Assets
-
-- macOS: `PersonaBrowser-1.1.0-universal.dmg`
-- Windows: `PersonaBrowser-Setup-1.1.0.exe`
-- Linux: `PersonaBrowser-1.1.0-x86_64.AppImage`
-- Debian/Ubuntu: `PersonaBrowser-1.1.0-amd64.deb`
+- Latest release page: [Persona Browser Releases](https://github.com/DataFrameworksCo/PersonaBrowser/releases/latest)
+- Windows `.exe`: `PersonaBrowser-Setup-<version>.exe`
+- macOS `.dmg`: `PersonaBrowser-<version>-universal.dmg`
+- Linux `.AppImage`: `PersonaBrowser-<version>-x86_64.AppImage`
+- Debian/Ubuntu `.deb`: `PersonaBrowser-<version>-amd64.deb`
