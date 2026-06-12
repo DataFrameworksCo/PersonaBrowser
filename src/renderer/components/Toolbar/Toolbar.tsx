@@ -31,6 +31,11 @@ const Toolbar: React.FC<ToolbarProps> = ({
     goBack,
     goForward,
     reload,
+    activeWorkspace,
+    bookmarks,
+    readingList,
+    addBookmark,
+    addToReadingList,
   } = useBrowser();
   const { activePersona } = usePersona();
 
@@ -39,9 +44,29 @@ const Toolbar: React.FC<ToolbarProps> = ({
 
   const isSecure = activeTab?.url?.startsWith('https://') ?? false;
   const isLoading = activeTab?.isLoading ?? false;
-  const activeHost = activeTab?.url?.startsWith('http')
-    ? new URL(activeTab.url).hostname.replace(/^www\./, '')
-    : 'Start page';
+  const activeUrl = activeTab?.url ?? '';
+  const activeHost = (() => {
+    if (!activeUrl.startsWith('http')) return 'Start page';
+    try {
+      return new URL(activeUrl).hostname.replace(/^www\./, '');
+    } catch {
+      return 'Current page';
+    }
+  })();
+  const isBookmarked = bookmarks.some((bookmark) => bookmark.url === activeUrl);
+  const readingItem = readingList.find((item) => item.url === activeUrl);
+
+  useEffect(() => {
+    const handleFocusAddress = () => {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    };
+
+    window.addEventListener('persona:focus-address', handleFocusAddress);
+    return () => {
+      window.removeEventListener('persona:focus-address', handleFocusAddress);
+    };
+  }, []);
 
   const getPrivacyScore = (): { score: number; level: 'high' | 'medium' | 'low' } => {
     if (!activeTab?.url || activeTab.url.startsWith('data:')) return { score: 100, level: 'high' };
@@ -64,7 +89,6 @@ const Toolbar: React.FC<ToolbarProps> = ({
 
   const handleBlur = () => {
     setIsFocused(false);
-    // Restore to actual URL if user didn't navigate
     if (activeTab && !activeTab.url.startsWith('data:') && activeTab.url !== 'persona://newtab') {
       setAddressValue(activeTab.url);
     }
@@ -102,34 +126,76 @@ const Toolbar: React.FC<ToolbarProps> = ({
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} style={{ flex: 1, display: 'flex', minWidth: 0 }}>
-        <div className="toolbar-address-bar">
-          <span className={`toolbar-lock-icon ${isSecure ? 'secure' : ''}`}>
-            <AppIcon name={isSecure ? 'shield-check' : 'shield-alert'} size={14} />
-          </span>
-          <input
-            ref={inputRef}
-            className="toolbar-address-input"
-            type="text"
-            value={isFocused ? addressValue : displayUrl}
-            onChange={(e) => setAddressValue(e.target.value)}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-            placeholder="Search or enter URL..."
-            spellCheck={false}
-            autoComplete="off"
-          />
-          {activeTab?.url && !activeTab.url.startsWith('data:') && !isFocused && (
-            <span className={`toolbar-privacy-score ${level}`} title={`Privacy score: ${score}`}>
-              <span>{score}</span>
-              <span className="toolbar-privacy-score-label">{isSecure ? 'Secure' : 'Watch'}</span>
-            </span>
-          )}
+      <div className="toolbar-center">
+        <div className="toolbar-context-chip">
+          <span className="toolbar-context-chip-label">Site</span>
+          <span className="toolbar-context-chip-value">{activeHost}</span>
         </div>
-      </form>
+
+        <form onSubmit={handleSubmit} className="toolbar-form">
+          <div className="toolbar-address-bar">
+            <span className={`toolbar-lock-icon ${isSecure ? 'secure' : ''}`}>
+              <AppIcon name={isSecure ? 'shield-check' : 'shield-alert'} size={14} />
+            </span>
+            <input
+              ref={inputRef}
+              className="toolbar-address-input"
+              type="text"
+              value={isFocused ? addressValue : displayUrl}
+              onChange={(e) => setAddressValue(e.target.value)}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              placeholder="Search or enter URL..."
+              spellCheck={false}
+              autoComplete="off"
+            />
+            {activeTab?.url && !activeTab.url.startsWith('data:') && !isFocused && (
+              <span className={`toolbar-privacy-score ${level}`} title={`Privacy score: ${score}`}>
+                <span>{score}</span>
+                <span className="toolbar-privacy-score-label">{isSecure ? 'Secure' : 'Watch'}</span>
+              </span>
+            )}
+          </div>
+        </form>
+
+        <button className="toolbar-workspace-chip" onClick={onOpenCommandCenter} title="Workspace and quick actions">
+          <span className="toolbar-workspace-chip-label">Workspace</span>
+          <span className="toolbar-workspace-chip-value">
+            <span
+              className="toolbar-workspace-chip-icon"
+              style={{
+                borderColor: `${activeWorkspace?.color ?? '#808080'}55`,
+                color: activeWorkspace?.color ?? 'var(--text-primary)',
+              }}
+            >
+              {activeWorkspace?.icon ?? 'WS'}
+            </span>
+            {activeWorkspace?.name ?? 'Workspace'}
+          </span>
+        </button>
+      </div>
 
       <div className="toolbar-right">
-        <button className="toolbar-btn" onClick={onOpenCommandCenter} title="Command center (⌘K)">
+        <button
+          className={`toolbar-quick-action ${isBookmarked ? 'active' : ''}`}
+          onClick={() => addBookmark()}
+          title="Save bookmark"
+        >
+          <AppIcon name="bookmark" size={14} />
+          <span>Bookmark</span>
+        </button>
+        <button
+          className={`toolbar-quick-action ${readingItem ? 'active' : ''}`}
+          onClick={() => addToReadingList()}
+          title="Save to reading list"
+        >
+          <AppIcon name="note" size={14} />
+          <span>{readingItem ? readingItem.state : 'Read Later'}</span>
+        </button>
+
+        <div className="toolbar-divider" />
+
+        <button className="toolbar-btn" onClick={onOpenCommandCenter} title="Command center (Ctrl/Cmd+K)">
           <AppIcon name="search" size={14} />
         </button>
         <button className="toolbar-btn" onClick={onOpenHistory} title="History">

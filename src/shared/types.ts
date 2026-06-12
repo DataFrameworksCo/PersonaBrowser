@@ -38,6 +38,45 @@ export interface HistoryEntry {
   visitCount: number;
 }
 
+export interface BookmarkEntry {
+  id: string;
+  title: string;
+  url: string;
+  favicon: string;
+  personaId: string;
+  addedAt: number;
+}
+
+export type ReadingState = 'unread' | 'reading' | 'done';
+
+export interface ReadingListItem {
+  id: string;
+  title: string;
+  url: string;
+  favicon: string;
+  personaId: string;
+  addedAt: number;
+  state: ReadingState;
+}
+
+export interface WorkspaceLink {
+  id: string;
+  title: string;
+  url: string;
+  description: string;
+}
+
+export interface Workspace {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  description: string;
+  focusNote: string;
+  links: WorkspaceLink[];
+  createdAt: number;
+}
+
 export type DownloadStatus = 'progressing' | 'completed' | 'interrupted' | 'cancelled';
 
 export interface DownloadRecord {
@@ -111,6 +150,10 @@ export interface Settings {
   installedExtensions: Extension[];
   historyEntries: HistoryEntry[];
   downloadHistory: DownloadRecord[];
+  bookmarks: BookmarkEntry[];
+  readingList: ReadingListItem[];
+  workspaces: Workspace[];
+  activeWorkspaceId: string;
   newTabUrl: string;
   customAccentColors: Record<string, string>;
 }

@@ -1,5 +1,21 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { Tab, Settings, Widget, ClosedTabEntry } from '../../shared/types';
+import {
+  Tab,
+  Settings,
+  Widget,
+  ClosedTabEntry,
+  BookmarkEntry,
+  ReadingListItem,
+  ReadingState,
+  Workspace,
+} from '../../shared/types';
+
+type SavedPageInput = {
+  title?: string;
+  url?: string;
+  favicon?: string;
+  personaId?: string;
+};
 
 interface BrowserContextValue {
   tabs: Tab[];
@@ -9,6 +25,10 @@ interface BrowserContextValue {
   sidebarOpen: boolean;
   recentClosedTabs: ClosedTabEntry[];
   addressValue: string;
+  bookmarks: BookmarkEntry[];
+  readingList: ReadingListItem[];
+  workspaces: Workspace[];
+  activeWorkspace: Workspace | null;
   setAddressValue: (v: string) => void;
   createTab: (personaId?: string, url?: string) => Promise<void>;
   closeTab: (tabId: string) => void;
@@ -23,10 +43,33 @@ interface BrowserContextValue {
   updateSettings: <K extends keyof Settings>(key: K, value: Settings[K]) => Promise<void>;
   addWidget: (widget: Widget) => Promise<void>;
   removeWidget: (widgetId: string) => Promise<void>;
+  addBookmark: (input?: SavedPageInput) => Promise<void>;
+  removeBookmark: (bookmarkId: string) => Promise<void>;
+  addToReadingList: (input?: SavedPageInput) => Promise<void>;
+  removeFromReadingList: (itemId: string) => Promise<void>;
+  setReadingState: (itemId: string, state: ReadingState) => Promise<void>;
+  setActiveWorkspace: (workspaceId: string) => Promise<void>;
+  addWorkspace: (name: string, color: string, description: string) => Promise<void>;
+  removeWorkspace: (workspaceId: string) => Promise<void>;
+  saveWorkspaceNote: (workspaceId: string, note: string) => Promise<void>;
+  addWorkspaceLink: (workspaceId: string, title: string, url: string, description: string) => Promise<void>;
+  removeWorkspaceLink: (workspaceId: string, linkId: string) => Promise<void>;
   refreshSettings: () => Promise<void>;
 }
 
 const BrowserContext = createContext<BrowserContextValue>({} as BrowserContextValue);
+
+const sanitizeUrl = (value: string): string => {
+  const next = value.trim();
+  if (!next || next.startsWith('persona://') || next.startsWith('data:')) return '';
+  if (next.startsWith('http://') || next.startsWith('https://') || next.startsWith('file://')) {
+    return next;
+  }
+  if (next.includes('.') && !next.includes(' ')) {
+    return `https://${next}`;
+  }
+  return next;
+};
 
 export const BrowserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [tabs, setTabs] = useState<Tab[]>([]);
@@ -35,12 +78,21 @@ export const BrowserProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [recentClosedTabs, setRecentClosedTabs] = useState<ClosedTabEntry[]>([]);
   const [addressValue, setAddressValue] = useState('');
   const tabsRef = useRef<Tab[]>([]);
+  const settingsRef = useRef<Settings | null>(null);
   const activeTabId = tabs.find((t) => t.isActive)?.id ?? null;
   const activeTab = tabs.find((t) => t.isActive) ?? null;
+  const bookmarks = settings?.bookmarks ?? [];
+  const readingList = settings?.readingList ?? [];
+  const workspaces = settings?.workspaces ?? [];
+  const activeWorkspace = workspaces.find((workspace) => workspace.id === settings?.activeWorkspaceId) ?? null;
 
   useEffect(() => {
     tabsRef.current = tabs;
   }, [tabs]);
+
+  useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
 
   const captureClosedTab = useCallback((tabToClose: Tab | undefined) => {
     if (!tabToClose) return;
@@ -60,18 +112,15 @@ export const BrowserProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const refreshSettings = useCallback(async () => {
-    const s = await window.persona.getSettings();
-    setSettings(s);
-    setSidebarOpen(s.sidebarOpen);
+    const nextSettings = await window.persona.getSettings();
+    setSettings(nextSettings);
+    setSidebarOpen(nextSettings.sidebarOpen);
   }, []);
 
   useEffect(() => {
     refreshSettings();
-
-    // Load initial tabs
     window.persona.getTabs().then(setTabs);
 
-    // Tab event listeners
     const unsubUpdated = window.persona.onTabUpdated((tab) => {
       setTabs((prev) => {
         const idx = prev.findIndex((t) => t.id === tab.id);
@@ -106,7 +155,6 @@ export const BrowserProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   }, [captureClosedTab, refreshSettings]);
 
-  // Keep address bar synced with active tab URL
   useEffect(() => {
     if (activeTab && !activeTab.url.startsWith('data:')) {
       setAddressValue(activeTab.url === 'persona://newtab' ? '' : activeTab.url);
@@ -124,12 +172,10 @@ export const BrowserProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const switchTab = useCallback(async (tabId: string) => {
     await window.persona.switchTab(tabId);
-    setTabs((prev) =>
-      prev.map((t) => ({ ...t, isActive: t.id === tabId }))
-    );
-    const tab = tabs.find((t) => t.id === tabId);
+    setTabs((prev) => prev.map((t) => ({ ...t, isActive: t.id === tabId })));
+    const tab = tabsRef.current.find((t) => t.id === tabId);
     if (tab) setAddressValue(tab.url.startsWith('data:') ? '' : tab.url);
-  }, [tabs]);
+  }, []);
 
   const navigateTo = useCallback((url: string) => {
     if (!activeTabId) return;
@@ -167,12 +213,12 @@ export const BrowserProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const toggleSidebar = useCallback(async () => {
     const newState = await window.persona.toggleSidebar();
     setSidebarOpen(newState);
-    if (settings) setSettings({ ...settings, sidebarOpen: newState });
-  }, [settings]);
+    setSettings((prev) => (prev ? { ...prev, sidebarOpen: newState } : prev));
+  }, []);
 
   const updateSettings = useCallback(async <K extends keyof Settings>(key: K, value: Settings[K]) => {
     await window.persona.setSetting(key, value);
-    setSettings((prev) => prev ? { ...prev, [key]: value } : prev);
+    setSettings((prev) => (prev ? { ...prev, [key]: value } : prev));
     if (key === 'sidebarOpen') setSidebarOpen(value as boolean);
   }, []);
 
@@ -186,6 +232,157 @@ export const BrowserProvider: React.FC<{ children: React.ReactNode }> = ({ child
     await refreshSettings();
   }, [refreshSettings]);
 
+  const buildSavedPage = useCallback((input?: SavedPageInput) => {
+    const source = activeTab ?? null;
+    const nextUrl = sanitizeUrl(input?.url ?? source?.url ?? '');
+    if (!nextUrl) return null;
+
+    const fallbackSettings = settingsRef.current;
+    return {
+      title: input?.title?.trim() || source?.title || nextUrl,
+      url: nextUrl,
+      favicon: input?.favicon ?? source?.favicon ?? '',
+      personaId: input?.personaId ?? source?.personaId ?? fallbackSettings?.activePersonaId ?? 'personal',
+    };
+  }, [activeTab]);
+
+  const addBookmark = useCallback(async (input?: SavedPageInput) => {
+    if (!settingsRef.current) return;
+    const savedPage = buildSavedPage(input);
+    if (!savedPage) return;
+
+    const nextBookmarks: BookmarkEntry[] = [
+      {
+        id: `bookmark-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        addedAt: Date.now(),
+        ...savedPage,
+      },
+      ...settingsRef.current.bookmarks.filter(
+        (bookmark) => !(bookmark.url === savedPage.url && bookmark.personaId === savedPage.personaId)
+      ),
+    ].slice(0, 48);
+
+    await updateSettings('bookmarks', nextBookmarks);
+  }, [buildSavedPage, updateSettings]);
+
+  const removeBookmark = useCallback(async (bookmarkId: string) => {
+    if (!settingsRef.current) return;
+    const nextBookmarks = settingsRef.current.bookmarks.filter((bookmark) => bookmark.id !== bookmarkId);
+    await updateSettings('bookmarks', nextBookmarks);
+  }, [updateSettings]);
+
+  const addToReadingList = useCallback(async (input?: SavedPageInput) => {
+    if (!settingsRef.current) return;
+    const savedPage = buildSavedPage(input);
+    if (!savedPage) return;
+
+    const existingEntry = settingsRef.current.readingList.find((item) => item.url === savedPage.url);
+    const nextItems: ReadingListItem[] = [
+      {
+        id: existingEntry?.id ?? `reading-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        addedAt: existingEntry?.addedAt ?? Date.now(),
+        state: existingEntry?.state ?? 'unread',
+        ...savedPage,
+      },
+      ...settingsRef.current.readingList.filter((item) => item.url !== savedPage.url),
+    ].slice(0, 80);
+
+    await updateSettings('readingList', nextItems);
+  }, [buildSavedPage, updateSettings]);
+
+  const removeFromReadingList = useCallback(async (itemId: string) => {
+    if (!settingsRef.current) return;
+    const nextItems = settingsRef.current.readingList.filter((item) => item.id !== itemId);
+    await updateSettings('readingList', nextItems);
+  }, [updateSettings]);
+
+  const setReadingState = useCallback(async (itemId: string, state: ReadingState) => {
+    if (!settingsRef.current) return;
+    const nextItems = settingsRef.current.readingList.map((item) => (
+      item.id === itemId ? { ...item, state } : item
+    ));
+    await updateSettings('readingList', nextItems);
+  }, [updateSettings]);
+
+  const setActiveWorkspace = useCallback(async (workspaceId: string) => {
+    await updateSettings('activeWorkspaceId', workspaceId);
+  }, [updateSettings]);
+
+  const addWorkspace = useCallback(async (name: string, color: string, description: string) => {
+    if (!settingsRef.current) return;
+    const trimmedName = name.trim();
+    if (!trimmedName) return;
+
+    const nextWorkspace: Workspace = {
+      id: `workspace-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      name: trimmedName,
+      icon: trimmedName.slice(0, 2).toUpperCase(),
+      color,
+      description: description.trim() || 'Custom workspace',
+      focusNote: '',
+      links: [],
+      createdAt: Date.now(),
+    };
+
+    const nextWorkspaces = [...settingsRef.current.workspaces, nextWorkspace];
+    await updateSettings('workspaces', nextWorkspaces);
+    await updateSettings('activeWorkspaceId', nextWorkspace.id);
+  }, [updateSettings]);
+
+  const removeWorkspace = useCallback(async (workspaceId: string) => {
+    if (!settingsRef.current || settingsRef.current.workspaces.length <= 1) return;
+
+    const nextWorkspaces = settingsRef.current.workspaces.filter((workspace) => workspace.id !== workspaceId);
+    const nextActiveWorkspaceId = settingsRef.current.activeWorkspaceId === workspaceId
+      ? nextWorkspaces[0]?.id ?? settingsRef.current.activeWorkspaceId
+      : settingsRef.current.activeWorkspaceId;
+
+    await updateSettings('workspaces', nextWorkspaces);
+    await updateSettings('activeWorkspaceId', nextActiveWorkspaceId);
+  }, [updateSettings]);
+
+  const saveWorkspaceNote = useCallback(async (workspaceId: string, note: string) => {
+    if (!settingsRef.current) return;
+    const nextWorkspaces = settingsRef.current.workspaces.map((workspace) => (
+      workspace.id === workspaceId ? { ...workspace, focusNote: note } : workspace
+    ));
+    await updateSettings('workspaces', nextWorkspaces);
+  }, [updateSettings]);
+
+  const addWorkspaceLink = useCallback(async (workspaceId: string, title: string, url: string, description: string) => {
+    if (!settingsRef.current) return;
+    const sanitizedUrl = sanitizeUrl(url);
+    if (!title.trim() || !sanitizedUrl) return;
+
+    const nextWorkspaces = settingsRef.current.workspaces.map((workspace) => {
+      if (workspace.id !== workspaceId) return workspace;
+      return {
+        ...workspace,
+        links: [
+          ...workspace.links,
+          {
+            id: `link-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            title: title.trim(),
+            url: sanitizedUrl,
+            description: description.trim(),
+          },
+        ],
+      };
+    });
+
+    await updateSettings('workspaces', nextWorkspaces);
+  }, [updateSettings]);
+
+  const removeWorkspaceLink = useCallback(async (workspaceId: string, linkId: string) => {
+    if (!settingsRef.current) return;
+    const nextWorkspaces = settingsRef.current.workspaces.map((workspace) => (
+      workspace.id === workspaceId
+        ? { ...workspace, links: workspace.links.filter((link) => link.id !== linkId) }
+        : workspace
+    ));
+    await updateSettings('workspaces', nextWorkspaces);
+  }, [updateSettings]);
+
   return (
     <BrowserContext.Provider
       value={{
@@ -196,6 +393,10 @@ export const BrowserProvider: React.FC<{ children: React.ReactNode }> = ({ child
         sidebarOpen,
         recentClosedTabs,
         addressValue,
+        bookmarks,
+        readingList,
+        workspaces,
+        activeWorkspace,
         setAddressValue,
         createTab,
         closeTab,
@@ -210,6 +411,17 @@ export const BrowserProvider: React.FC<{ children: React.ReactNode }> = ({ child
         updateSettings,
         addWidget,
         removeWidget,
+        addBookmark,
+        removeBookmark,
+        addToReadingList,
+        removeFromReadingList,
+        setReadingState,
+        setActiveWorkspace,
+        addWorkspace,
+        removeWorkspace,
+        saveWorkspaceNote,
+        addWorkspaceLink,
+        removeWorkspaceLink,
         refreshSettings,
       }}
     >

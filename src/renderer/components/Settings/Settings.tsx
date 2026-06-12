@@ -10,7 +10,7 @@ interface SettingsProps {
   onClose: () => void;
 }
 
-type SettingsTab = 'appearance' | 'privacy' | 'search' | 'personas' | 'about';
+type SettingsTab = 'appearance' | 'privacy' | 'search' | 'workspaces' | 'personas' | 'about';
 
 const THEMES: { id: Theme; name: string; bar: string; body: string }[] = [
   { id: 'dark', name: 'Dark', bar: '#16213e', body: '#1a1a2e' },
@@ -21,8 +21,8 @@ const THEMES: { id: Theme; name: string; bar: string; body: string }[] = [
 ];
 
 const ACCENT_COLORS = [
-  '#e94560', '#4A9EFF', '#4AFF91', '#B44AFF', '#FF9F4A',
-  '#FF4AE8', '#00D4FF', '#4ADE80', '#FACC15', '#FB923C',
+  '#8a6546', '#365b86', '#4f6b45', '#7a3941', '#6e5d3d',
+  '#4A9EFF', '#4ADE80', '#FACC15', '#FB923C', '#00D4FF',
 ];
 
 const Toggle: React.FC<{ checked: boolean; onChange: (v: boolean) => void }> = ({ checked, onChange }) => (
@@ -35,12 +35,15 @@ const Toggle: React.FC<{ checked: boolean; onChange: (v: boolean) => void }> = (
 const Settings: React.FC<SettingsProps> = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState<SettingsTab>('appearance');
   const { theme, accentColor, setTheme, setAccentColor } = useTheme();
-  const { settings, updateSettings } = useBrowser();
+  const { settings, updateSettings, workspaces, activeWorkspace, setActiveWorkspace, addWorkspace, removeWorkspace } = useBrowser();
   const { personas, createPersona, deletePersona } = usePersona();
 
   const [newPersonaName, setNewPersonaName] = useState('');
   const [newPersonaColor, setNewPersonaColor] = useState('#4A9EFF');
   const [newPersonaIcon, setNewPersonaIcon] = useState('🌐');
+  const [newWorkspaceName, setNewWorkspaceName] = useState('');
+  const [newWorkspaceColor, setNewWorkspaceColor] = useState('#8a6546');
+  const [newWorkspaceDescription, setNewWorkspaceDescription] = useState('');
 
   if (!settings) return null;
 
@@ -48,6 +51,7 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
     { id: 'appearance', icon: 'palette', label: 'Appearance' },
     { id: 'privacy', icon: 'lock', label: 'Privacy & Security' },
     { id: 'search', icon: 'search', label: 'Search' },
+    { id: 'workspaces', icon: 'layout', label: 'Workspaces' },
     { id: 'personas', icon: 'user', label: 'Personas' },
     { id: 'about', icon: 'info', label: 'About' },
   ];
@@ -170,6 +174,132 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
             <option value="bing">Bing</option>
             <option value="brave">Brave Search</option>
           </select>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderWorkspaces = () => (
+    <div className="settings-section">
+      <div className="settings-section-title">Workspaces</div>
+      <div className="settings-section-desc">Organize launch links, notes, and saved pages by task.</div>
+
+      <div className="settings-group" style={{ marginBottom: '16px' }}>
+        {workspaces.map((workspace) => (
+          <div key={workspace.id} className="settings-row">
+            <button
+              onClick={() => setActiveWorkspace(workspace.id)}
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 10,
+                border: `1px solid ${workspace.color}55`,
+                background: `${workspace.color}18`,
+                color: workspace.color,
+                fontSize: 12,
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              {workspace.icon}
+            </button>
+            <div className="settings-row-info">
+              <div className="settings-row-label">{workspace.name}</div>
+              <div className="settings-row-desc">
+                {workspace.description}
+                {' · '}
+                {workspace.links.length} links
+                {workspace.id === activeWorkspace?.id ? ' · Active' : ''}
+              </div>
+            </div>
+            {workspaces.length > 1 && (
+              <button
+                onClick={() => removeWorkspace(workspace.id)}
+                style={{
+                  padding: '5px 10px',
+                  borderRadius: 'var(--border-radius-sm)',
+                  fontSize: '12px',
+                  background: 'rgba(239,68,68,0.12)',
+                  color: '#ef4444',
+                  border: '1px solid rgba(239,68,68,0.2)',
+                  cursor: 'pointer',
+                }}
+              >
+                Delete
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="settings-group">
+        <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
+          Create New Workspace
+        </div>
+        <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <input
+            value={newWorkspaceName}
+            onChange={(e) => setNewWorkspaceName(e.target.value)}
+            placeholder="Workspace name"
+            style={{
+              background: 'var(--input-bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--border-radius-sm)',
+              padding: '9px 10px',
+              fontSize: '13px',
+              color: 'var(--text-primary)',
+              outline: 'none',
+              fontFamily: 'var(--font)',
+            }}
+          />
+          <input
+            value={newWorkspaceDescription}
+            onChange={(e) => setNewWorkspaceDescription(e.target.value)}
+            placeholder="Short description"
+            style={{
+              background: 'var(--input-bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--border-radius-sm)',
+              padding: '9px 10px',
+              fontSize: '13px',
+              color: 'var(--text-primary)',
+              outline: 'none',
+              fontFamily: 'var(--font)',
+            }}
+          />
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <input
+              type="color"
+              value={newWorkspaceColor}
+              onChange={(e) => setNewWorkspaceColor(e.target.value)}
+              style={{ width: 40, height: 38, border: '1px solid var(--border)', borderRadius: 'var(--border-radius-sm)', padding: 2, cursor: 'pointer', background: 'var(--input-bg)' }}
+            />
+            <button
+              onClick={async () => {
+                await addWorkspace(newWorkspaceName, newWorkspaceColor, newWorkspaceDescription);
+                setNewWorkspaceName('');
+                setNewWorkspaceColor('#8a6546');
+                setNewWorkspaceDescription('');
+              }}
+              style={{
+                flex: 1,
+                padding: '9px',
+                borderRadius: 'var(--border-radius-sm)',
+                background: 'var(--accent)',
+                color: 'white',
+                border: 'none',
+                fontSize: '13px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                fontFamily: 'var(--font)',
+              }}
+            >
+              Create Workspace
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -327,6 +457,7 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
       case 'appearance': return renderAppearance();
       case 'privacy': return renderPrivacy();
       case 'search': return renderSearch();
+      case 'workspaces': return renderWorkspaces();
       case 'personas': return renderPersonas();
       case 'about': return renderAbout();
     }

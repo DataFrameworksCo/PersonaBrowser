@@ -2,34 +2,58 @@
   display: flex;
   align-items: center;
   height: 40px;
-  background: color-mix(in srgb, var(--bg-secondary) 96%, transparent);
+  background: color-mix(in srgb, var(--bg-secondary) 98%, transparent);
   border-bottom: 1px solid var(--border);
-  padding: 0 8px;
-  gap: 6px;
+  padding: 0 10px;
+  gap: 8px;
   overflow-x: auto;
   overflow-y: hidden;
   flex-shrink: 0;
   -webkit-app-region: drag;
   user-select: none;
-  backdrop-filter: blur(20px);
 }
 
-.tab-bar::-webkit-scrollbar {
+.tab-bar::-webkit-scrollbar,
+.tab-bar-tabs::-webkit-scrollbar {
   height: 0;
+}
+
+.tab-bar-stamp {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tab-bar-stamp-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.tab-bar-stamp-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .tab-bar-tabs {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   flex: 1;
   overflow-x: auto;
   overflow-y: hidden;
   min-width: 0;
-}
-
-.tab-bar-tabs::-webkit-scrollbar {
-  height: 0;
 }
 
 .no-drag {
@@ -40,16 +64,15 @@
   -webkit-app-region: no-drag;
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   height: 30px;
-  min-width: 96px;
-  max-width: 200px;
-  padding: 0 8px 0 8px;
+  min-width: 110px;
+  max-width: 220px;
+  padding: 0 10px;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: 11px;
   cursor: pointer;
-  transition: background var(--transition), border-color var(--transition);
   position: relative;
   flex-shrink: 0;
   user-select: none;
@@ -63,7 +86,7 @@
 .tab.active {
   background: var(--tab-active-bg);
   border-color: var(--border-hover);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .tab-persona-indicator {
@@ -106,7 +129,7 @@
 
 .tab-title {
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -117,7 +140,6 @@
 
 .tab.active .tab-title {
   color: var(--text-primary);
-  font-weight: 600;
 }
 
 .tab-close {
@@ -129,56 +151,20 @@
   justify-content: center;
   color: var(--text-muted);
   opacity: 0;
-  transition: all var(--transition);
   flex-shrink: 0;
-  line-height: 1;
 }
 
 .tab:hover .tab-close,
 .tab.active .tab-close {
-  opacity: 0.7;
+  opacity: 0.8;
 }
 
 .tab-close:hover {
-  opacity: 1 !important;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   color: var(--text-primary);
 }
 
-.tab-new-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 9px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
-  transition: background var(--transition), color var(--transition), border-color var(--transition);
-  flex-shrink: 0;
-  line-height: 1;
-  border: 1px solid transparent;
-}
-
-.tab-new-btn:hover {
-  background: var(--tab-bg);
-  border-color: var(--border);
-  color: var(--text-secondary);
-}
-
-.tab-bar-spacer {
-  flex: 0 0 auto;
-  width: 6px;
-}
-
-/* Window control buttons */
-.window-controls {
-  display: flex;
-  align-items: center;
-  gap: 1px;
-  flex-shrink: 0;
-  margin-left: 2px;
-}
-
+.tab-new-btn,
 .wc-btn {
   width: 28px;
   height: 28px;
@@ -187,17 +173,25 @@
   align-items: center;
   justify-content: center;
   color: var(--text-muted);
-  cursor: pointer;
-  transition: all var(--transition);
-  line-height: 1;
+  border: 1px solid transparent;
 }
 
+.tab-new-btn:hover,
 .wc-btn:hover {
-  background: var(--tab-active-bg);
+  background: var(--tab-bg);
+  border-color: var(--border);
   color: var(--text-secondary);
 }
 
+.window-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
 .wc-close:hover {
-  background: rgba(220, 50, 50, 0.75);
+  background: rgba(162, 72, 72, 0.9);
+  border-color: transparent;
   color: #fff;
 }

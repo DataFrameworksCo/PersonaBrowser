@@ -1,58 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useBrowser } from '../../contexts/BrowserContext';
 import AppIcon from '../ui/AppIcon';
 
-interface Bookmark {
-  id: string;
-  title: string;
-  url: string;
-  favicon?: string;
-}
-
-const DEFAULT_BOOKMARKS: Bookmark[] = [
-  { id: '1', title: 'GitHub', url: 'https://github.com', favicon: '' },
-  { id: '2', title: 'Hacker News', url: 'https://news.ycombinator.com', favicon: '' },
-  { id: '3', title: 'DuckDuckGo', url: 'https://duckduckgo.com', favicon: '' },
-];
-
 const BookmarksWidget: React.FC = () => {
-  const { navigateTo } = useBrowser();
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>(() => {
-    try {
-      const stored = localStorage.getItem('persona-bookmarks');
-      return stored ? JSON.parse(stored) : DEFAULT_BOOKMARKS;
-    } catch {
-      return DEFAULT_BOOKMARKS;
-    }
-  });
+  const { bookmarks, addBookmark, removeBookmark, createTab } = useBrowser();
   const [showAdd, setShowAdd] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newUrl, setNewUrl] = useState('');
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('persona-bookmarks', JSON.stringify(bookmarks));
-    } catch {
-      // ignore
-    }
-  }, [bookmarks]);
-
-  const addBookmark = (e: React.FormEvent) => {
+  const addCustomBookmark = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim() || !newUrl.trim()) return;
-    const bookmark: Bookmark = {
-      id: Date.now().toString(),
+    await addBookmark({
       title: newTitle.trim(),
-      url: newUrl.trim().startsWith('http') ? newUrl.trim() : 'https://' + newUrl.trim(),
-    };
-    setBookmarks((prev) => [...prev, bookmark]);
+      url: newUrl.trim(),
+    });
     setNewTitle('');
     setNewUrl('');
     setShowAdd(false);
-  };
-
-  const removeBookmark = (id: string) => {
-    setBookmarks((prev) => prev.filter((b) => b.id !== id));
   };
 
   return (
@@ -69,20 +34,20 @@ const BookmarksWidget: React.FC = () => {
           </span>
         </div>
       </div>
-      {bookmarks.map((bm) => (
+      {bookmarks.slice(0, 6).map((bookmark) => (
         <div
-          key={bm.id}
+          key={bookmark.id}
           className="widget-bookmark-row"
-          onClick={() => navigateTo(bm.url)}
+          onClick={() => createTab(bookmark.personaId, bookmark.url)}
         >
           <div className="widget-bookmark-icon"><AppIcon name="bookmark" size={14} /></div>
           <div className="widget-bookmark-meta">
-            <div className="widget-bookmark-title">{bm.title}</div>
-            <div className="widget-bookmark-url">{bm.url.replace(/^https?:\/\//, '')}</div>
+            <div className="widget-bookmark-title">{bookmark.title}</div>
+            <div className="widget-bookmark-url">{bookmark.url.replace(/^https?:\/\//, '')}</div>
           </div>
           <button
             className="widget-icon-button"
-            onClick={(e) => { e.stopPropagation(); removeBookmark(bm.id); }}
+            onClick={(e) => { e.stopPropagation(); void removeBookmark(bookmark.id); }}
           >
             <AppIcon name="x" size={12} />
           </button>
@@ -90,7 +55,7 @@ const BookmarksWidget: React.FC = () => {
       ))}
 
       {showAdd ? (
-        <form onSubmit={addBookmark} className="widget-stack">
+        <form onSubmit={(e) => { void addCustomBookmark(e); }} className="widget-stack">
           <input
             className="widget-input"
             value={newTitle}

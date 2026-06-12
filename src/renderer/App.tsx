@@ -37,6 +37,33 @@ const App: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => {
+      const modifier = event.metaKey || event.ctrlKey;
+      if (modifier && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        openOverlay('command-center');
+      }
+      if (modifier && event.key === ',') {
+        event.preventDefault();
+        openOverlay('settings');
+      }
+      if (modifier && event.key.toLowerCase() === 'l') {
+        event.preventDefault();
+        window.dispatchEvent(new CustomEvent('persona:focus-address'));
+      }
+      if (event.key === 'Escape') {
+        if (showPersonaSwitcher) closePersonaSwitcher();
+        if (overlay) closeOverlay();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeydown);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+    };
+  }, [overlay, showPersonaSwitcher]);
+
   const openOverlay = (page: OverlayPage) => {
     window.persona.showOverlay();
     setOverlay(page);

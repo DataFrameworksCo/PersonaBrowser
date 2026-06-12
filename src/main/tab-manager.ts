@@ -142,6 +142,56 @@ class TabManager {
     }[settings.defaultSearchEngine] ?? 'https://duckduckgo.com/?q=';
 
     const accentColor = persona?.color ?? '#6366f1';
+    const activeWorkspace = settings.workspaces.find((workspace) => workspace.id === settings.activeWorkspaceId)
+      ?? settings.workspaces[0];
+    const featuredLinks = (activeWorkspace?.links ?? []).slice(0, 6);
+    const bookmarks = settings.bookmarks.slice(0, 6);
+    const readingList = settings.readingList.slice(0, 4);
+    const workspaces = settings.workspaces.slice(0, 4);
+
+    const escapeHtml = (value: string): string => value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+    const featuredLinksMarkup = featuredLinks.map((link) => `
+      <button class="launch-item" onclick="navigate(decodeURIComponent('${encodeURIComponent(link.url)}'))">
+        <span class="launch-item-kicker">${escapeHtml(activeWorkspace?.name ?? 'Desk')}</span>
+        <span class="launch-item-title">${escapeHtml(link.title)}</span>
+        <span class="launch-item-desc">${escapeHtml(link.description || link.url)}</span>
+      </button>
+    `).join('');
+
+    const bookmarkMarkup = bookmarks.map((bookmark) => `
+      <button class="list-row" onclick="navigate(decodeURIComponent('${encodeURIComponent(bookmark.url)}'))">
+        <span class="list-row-title">${escapeHtml(bookmark.title)}</span>
+        <span class="list-row-meta">${escapeHtml(bookmark.url.replace(/^https?:\/\//, ''))}</span>
+      </button>
+    `).join('');
+
+    const readingMarkup = readingList.map((item) => `
+      <button class="list-row" onclick="navigate(decodeURIComponent('${encodeURIComponent(item.url)}'))">
+        <span class="list-row-title">${escapeHtml(item.title)}</span>
+        <span class="list-row-meta">
+          <span class="status-pill ${escapeHtml(item.state)}">${escapeHtml(item.state)}</span>
+          ${escapeHtml(item.url.replace(/^https?:\/\//, ''))}
+        </span>
+      </button>
+    `).join('');
+
+    const workspaceMarkup = workspaces.map((workspace) => `
+      <div class="workspace-card">
+        <div class="workspace-card-head">
+          <span class="workspace-card-icon" style="color:${escapeHtml(workspace.color)}">${escapeHtml(workspace.icon)}</span>
+          <span class="workspace-card-name">${escapeHtml(workspace.name)}</span>
+        </div>
+        <div class="workspace-card-desc">${escapeHtml(workspace.description)}</div>
+        <div class="workspace-card-meta">${workspace.links.length} links</div>
+      </div>
+    `).join('');
+
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -151,190 +201,379 @@ class TabManager {
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+      font-family: 'Aptos', 'Segoe UI Variable Text', 'Inter', sans-serif;
       background:
-        radial-gradient(ellipse 60% 50% at 70% 0%, ${accentColor}1a, transparent),
-        linear-gradient(180deg, #0b1120 0%, #111827 100%);
+        linear-gradient(180deg, rgba(15, 11, 9, 0.92), rgba(15, 11, 9, 0.92)),
+        radial-gradient(circle at top right, ${accentColor}18, transparent 32%),
+        #171311;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      padding: 40px 24px;
-      overflow: hidden;
+      color: #181410;
+      padding: 28px;
     }
-    .shell {
-      width: min(680px, 100%);
+    .page {
+      min-height: calc(100vh - 56px);
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.9fr);
+      gap: 18px;
+    }
+    .panel {
+      background: #f1eadf;
+      border-radius: 28px;
+      border: 1px solid rgba(24, 20, 16, 0.08);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.22);
+    }
+    .hero {
+      padding: 28px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 24px;
+      gap: 22px;
+    }
+    .aside {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding: 18px;
+      background: rgba(241, 234, 223, 0.06);
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #f1eadf;
     }
     .persona-pill {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
-      padding: 5px 12px 5px 8px;
+      gap: 8px;
+      padding: 8px 12px;
       border-radius: 999px;
-      border: 1px solid ${accentColor}33;
-      background: ${accentColor}0f;
+      border: 1px solid rgba(24, 20, 16, 0.08);
+      background: rgba(255,255,255,0.54);
       font-size: 12px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.75);
-      letter-spacing: 0.01em;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      width: fit-content;
     }
     .persona-dot {
-      width: 8px;
-      height: 8px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
       background: ${accentColor};
       flex-shrink: 0;
     }
-    .clock-block {
-      text-align: center;
+    .headline {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 10px;
+      border-bottom: 1px solid rgba(24, 20, 16, 0.09);
+      padding-bottom: 22px;
+    }
+    .eyebrow {
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(24, 20, 16, 0.58);
+      font-weight: 700;
+    }
+    .title {
+      font-family: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+      font-size: clamp(46px, 7vw, 74px);
+      line-height: 0.96;
+      letter-spacing: -0.045em;
+      max-width: 10ch;
+    }
+    .subcopy {
+      max-width: 56ch;
+      color: rgba(24, 20, 16, 0.7);
+      font-size: 15px;
+      line-height: 1.65;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+      gap: 18px;
+    }
+    .clock-card, .brief-card, .launch-card, .list-card, .workspace-card {
+      border-radius: 22px;
+      border: 1px solid rgba(24, 20, 16, 0.08);
+      background: rgba(255,255,255,0.55);
+    }
+    .clock-card {
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 240px;
+      justify-content: space-between;
+    }
+    .clock-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
     .clock {
-      font-size: clamp(60px, 10vw, 96px);
-      font-weight: 700;
-      letter-spacing: -0.05em;
-      color: #f0f4ff;
-      line-height: 1;
+      font-family: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+      font-size: clamp(60px, 9vw, 92px);
+      letter-spacing: -0.06em;
+      line-height: 0.9;
     }
     .clock-seconds {
       font-size: 0.42em;
-      font-weight: 500;
-      color: rgba(255,255,255,0.45);
+      color: rgba(24, 20, 16, 0.42);
       vertical-align: middle;
     }
     .date {
       font-size: 14px;
-      color: rgba(255,255,255,0.45);
-      letter-spacing: 0.02em;
-    }
-    .search-wrap {
-      width: 100%;
+      color: rgba(24, 20, 16, 0.58);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
     .search-form {
-      display: flex;
-      align-items: center;
-      gap: 0;
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 16px;
-      padding: 4px 4px 4px 16px;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .search-form:focus-within {
-      border-color: ${accentColor}66;
-      box-shadow: 0 0 0 3px ${accentColor}18;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
     }
     .search-input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: rgba(255,255,255,0.9);
+      height: 50px;
+      border-radius: 16px;
+      border: 1px solid rgba(24, 20, 16, 0.1);
+      background: rgba(255,255,255,0.7);
+      padding: 0 16px;
       font-size: 15px;
-      padding: 10px 0;
+      color: #181410;
     }
-    .search-input::placeholder { color: rgba(255,255,255,0.3); }
     .search-btn {
-      background: ${accentColor};
-      border: none;
-      border-radius: 12px;
-      color: white;
-      cursor: pointer;
-      padding: 9px 18px;
+      height: 50px;
+      border-radius: 16px;
+      border: 0;
+      background: #181410;
+      color: #f1eadf;
+      padding: 0 20px;
       font-size: 13px;
-      font-weight: 600;
-      transition: opacity 0.15s, transform 0.15s;
-      flex-shrink: 0;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
     }
-    .search-btn:hover { opacity: 0.88; transform: scale(0.98); }
-    .shortcuts {
-      width: 100%;
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 8px;
-    }
-    .shortcut {
+    .brief-card {
+      padding: 20px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 7px;
-      padding: 12px 8px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.07);
-      background: rgba(255,255,255,0.04);
-      cursor: pointer;
-      transition: background 0.15s, border-color 0.15s, transform 0.15s;
-      text-decoration: none;
-      color: rgba(255,255,255,0.75);
+      gap: 12px;
+    }
+    .section-kicker {
       font-size: 11px;
-      font-weight: 500;
-      text-align: center;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: rgba(24, 20, 16, 0.5);
+      font-weight: 700;
     }
-    .shortcut:hover {
-      background: rgba(255,255,255,0.09);
-      border-color: rgba(255,255,255,0.14);
-      transform: translateY(-1px);
-      color: rgba(255,255,255,0.9);
+    .section-title {
+      font-family: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+      font-size: 22px;
+      line-height: 1.1;
     }
-    .shortcut-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
+    .section-copy {
+      color: rgba(24, 20, 16, 0.7);
+      line-height: 1.55;
+      font-size: 14px;
+    }
+    .launch-card {
+      margin-top: 4px;
+      padding: 18px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .launch-item {
+      text-align: left;
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(24, 20, 16, 0.08);
+      background: rgba(255,255,255,0.64);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      color: inherit;
+    }
+    .launch-item-kicker {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(24, 20, 16, 0.46);
+      font-weight: 700;
+    }
+    .launch-item-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .launch-item-desc {
+      font-size: 13px;
+      line-height: 1.5;
+      color: rgba(24, 20, 16, 0.66);
+    }
+    .aside-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: rgba(241, 234, 223, 0.56);
+      font-weight: 700;
+    }
+    .workspace-grid {
+      display: grid;
+      gap: 10px;
+    }
+    .workspace-card {
+      padding: 16px;
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.08);
+      color: inherit;
+    }
+    .workspace-card-head {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 17px;
+      gap: 10px;
+    }
+    .workspace-card-icon {
+      font-size: 12px;
+      font-weight: 800;
+      border: 1px solid currentColor;
+      border-radius: 8px;
+      padding: 4px 6px;
+    }
+    .workspace-card-name {
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .workspace-card-desc {
+      margin-top: 10px;
+      color: rgba(241, 234, 223, 0.72);
+      line-height: 1.5;
+      font-size: 13px;
+    }
+    .workspace-card-meta {
+      margin-top: 12px;
+      color: rgba(241, 234, 223, 0.52);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .list-card {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
       background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.08);
+      color: inherit;
+    }
+    .list-row {
+      text-align: left;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      border-radius: 16px;
+      padding: 14px;
+      color: inherit;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .list-row-title {
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .list-row-meta {
+      color: rgba(241, 234, 223, 0.62);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 64px;
+      margin-right: 8px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .status-pill.unread { background: rgba(138, 101, 70, 0.22); color: #f7d0af; }
+    .status-pill.reading { background: rgba(54, 91, 134, 0.24); color: #b6d4f4; }
+    .status-pill.done { background: rgba(79, 107, 69, 0.24); color: #cde3be; }
+    .empty-copy {
+      color: rgba(241, 234, 223, 0.58);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    @media (max-width: 1080px) {
+      .page {
+        grid-template-columns: 1fr;
+      }
+      .hero-grid,
+      .launch-card {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-  <main class="shell">
-    <div class="persona-pill">
-      <div class="persona-dot"></div>
-      ${persona?.icon ?? ''} ${persona?.name ?? 'Personal'}
-    </div>
-    <div class="clock-block">
-      <div class="clock" id="clock">00:00<span class="clock-seconds" id="secs">:00</span></div>
-      <div class="date" id="date"></div>
-    </div>
-    <div class="search-wrap">
-      <form class="search-form" id="searchForm">
-        <input class="search-input" type="text" placeholder="Search or enter address…" id="searchInput" autofocus>
-        <button class="search-btn" type="submit">Go</button>
-      </form>
-    </div>
-    <div class="shortcuts">
-      <a class="shortcut" onclick="navigate('https://github.com')">
-        <div class="shortcut-icon">⌥</div>GitHub
-      </a>
-      <a class="shortcut" onclick="navigate('https://news.ycombinator.com')">
-        <div class="shortcut-icon">Y</div>HN
-      </a>
-      <a class="shortcut" onclick="navigate('https://reddit.com')">
-        <div class="shortcut-icon">R</div>Reddit
-      </a>
-      <a class="shortcut" onclick="navigate('https://youtube.com')">
-        <div class="shortcut-icon">▶</div>YouTube
-      </a>
-      <a class="shortcut" onclick="navigate('https://x.com')">
-        <div class="shortcut-icon">𝕏</div>X
-      </a>
-      <a class="shortcut" onclick="navigate('https://proton.me')">
-        <div class="shortcut-icon">✉</div>Proton
-      </a>
-    </div>
+  <main class="page">
+    <section class="panel hero">
+      <div class="persona-pill">
+        <div class="persona-dot"></div>
+        ${escapeHtml(persona?.name ?? 'Personal')} Desk
+      </div>
+
+      <div class="headline">
+        <div class="eyebrow">Structured Start</div>
+        <div class="title">A browser built for real work.</div>
+        <div class="subcopy">Use the start page as a live desk: quick search, focused launch links, reading backlog, and workspace context without the usual glossy filler.</div>
+      </div>
+
+      <div class="hero-grid">
+        <div class="clock-card">
+          <div class="clock-block">
+            <div class="clock" id="clock">00:00<span class="clock-seconds" id="secs">:00</span></div>
+            <div class="date" id="date"></div>
+          </div>
+          <form class="search-form" id="searchForm">
+            <input class="search-input" type="text" placeholder="Search or enter address..." id="searchInput" autofocus>
+            <button class="search-btn" type="submit">Go</button>
+          </form>
+        </div>
+
+        <div class="brief-card">
+          <div class="section-kicker">Active Workspace</div>
+          <div class="section-title">${escapeHtml(activeWorkspace?.name ?? 'Workspace')}</div>
+          <div class="section-copy">${escapeHtml(activeWorkspace?.focusNote || activeWorkspace?.description || 'Use workspaces to keep browsing intent visible instead of scattered across tabs.')}</div>
+        </div>
+      </div>
+
+      <div class="section-kicker">Launch Board</div>
+      <div class="launch-card">
+        ${featuredLinksMarkup || '<div class="section-copy">Add launch links to the active workspace from the sidebar.</div>'}
+      </div>
+    </section>
+
+    <aside class="aside">
+      <div>
+        <div class="aside-title">Workspaces</div>
+        <div class="workspace-grid">${workspaceMarkup}</div>
+      </div>
+
+      <div class="list-card">
+        <div class="aside-title">Bookmarks</div>
+        ${bookmarkMarkup || '<div class="empty-copy">Saved bookmarks will show up here.</div>'}
+      </div>
+
+      <div class="list-card">
+        <div class="aside-title">Reading Queue</div>
+        ${readingMarkup || '<div class="empty-copy">Queue articles from the toolbar or command center.</div>'}
+      </div>
+    </aside>
   </main>
   <script>
     function updateClock() {

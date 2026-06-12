@@ -45,7 +45,7 @@ const TabItem: React.FC<TabItemProps> = ({ tab, persona, onSwitch, onClose }) =>
 };
 
 const TabBar: React.FC = () => {
-  const { tabs, switchTab, closeTab, createTab, activeTabId } = useBrowser();
+  const { tabs, switchTab, closeTab, createTab, activeWorkspace } = useBrowser();
   const { personas, activePersonaId } = usePersona();
   const [isMaximized, setIsMaximized] = useState(false);
 
@@ -70,6 +70,10 @@ const TabBar: React.FC = () => {
 
   return (
     <div className="tab-bar">
+      <div className="tab-bar-stamp no-drag">
+        <span className="tab-bar-stamp-label">Desk</span>
+        <span className="tab-bar-stamp-value">{activeWorkspace?.name ?? 'Workspace'}</span>
+      </div>
       <div className="tab-bar-tabs">
         {tabs.map((tab) => {
           const persona = personas.find((p) => p.id === tab.personaId);

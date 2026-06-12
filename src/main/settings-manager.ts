@@ -1,5 +1,12 @@
 import Store from 'electron-store';
-import { Settings, Persona, Widget, Theme, SearchEngine, PrivacyLevel } from '../shared/types';
+import {
+  Settings,
+  Persona,
+  Widget,
+  Workspace,
+  BookmarkEntry,
+  ReadingListItem,
+} from '../shared/types';
 
 const DEFAULT_PERSONAS: Persona[] = [
   {
@@ -42,6 +49,80 @@ const DEFAULT_WIDGETS: Widget[] = [
   { id: 'bookmarks-1', type: 'bookmarks', title: 'Bookmarks', enabled: true },
 ];
 
+const DEFAULT_WORKSPACES: Workspace[] = [
+  {
+    id: 'briefing',
+    name: 'Briefing',
+    icon: 'BR',
+    color: '#8a6546',
+    description: 'Mail, calendar, and the first scan of the day.',
+    focusNote: 'Keep this space for comms, dashboards, and inbox triage.',
+    links: [
+      { id: 'briefing-gmail', title: 'Gmail', url: 'https://mail.google.com', description: 'Primary inbox' },
+      { id: 'briefing-calendar', title: 'Calendar', url: 'https://calendar.google.com', description: 'Schedule' },
+      { id: 'briefing-news', title: 'Hacker News', url: 'https://news.ycombinator.com', description: 'Morning read' },
+    ],
+    createdAt: Date.now(),
+  },
+  {
+    id: 'build',
+    name: 'Build',
+    icon: 'DV',
+    color: '#365b86',
+    description: 'Repos, docs, CI, and deployment surfaces.',
+    focusNote: 'Use this space for implementation work and release checks.',
+    links: [
+      { id: 'build-github', title: 'GitHub', url: 'https://github.com', description: 'Repos and PRs' },
+      { id: 'build-mdn', title: 'MDN', url: 'https://developer.mozilla.org', description: 'Web reference' },
+      { id: 'build-npm', title: 'npm', url: 'https://www.npmjs.com', description: 'Package registry' },
+    ],
+    createdAt: Date.now(),
+  },
+  {
+    id: 'research',
+    name: 'Research',
+    icon: 'RS',
+    color: '#4f6b45',
+    description: 'Specifications, tickets, and long-form reading.',
+    focusNote: 'Capture source material here before it turns into implementation.',
+    links: [
+      { id: 'research-wiki', title: 'Wikipedia', url: 'https://www.wikipedia.org', description: 'Reference' },
+      { id: 'research-duck', title: 'DuckDuckGo', url: 'https://duckduckgo.com', description: 'Search' },
+      { id: 'research-youtube', title: 'YouTube', url: 'https://www.youtube.com', description: 'Walkthroughs' },
+    ],
+    createdAt: Date.now(),
+  },
+];
+
+const DEFAULT_BOOKMARKS: BookmarkEntry[] = [
+  {
+    id: 'bookmark-github',
+    title: 'GitHub',
+    url: 'https://github.com',
+    favicon: '',
+    personaId: 'work',
+    addedAt: Date.now(),
+  },
+  {
+    id: 'bookmark-mdn',
+    title: 'MDN',
+    url: 'https://developer.mozilla.org',
+    favicon: '',
+    personaId: 'work',
+    addedAt: Date.now(),
+  },
+  {
+    id: 'bookmark-ddg',
+    title: 'DuckDuckGo',
+    url: 'https://duckduckgo.com',
+    favicon: '',
+    personaId: 'personal',
+    addedAt: Date.now(),
+  },
+];
+
+const DEFAULT_READING_LIST: ReadingListItem[] = [];
+
 const DEFAULT_SETTINGS: Settings = {
   theme: 'dark',
   accentColor: '#6366f1',
@@ -56,6 +137,10 @@ const DEFAULT_SETTINGS: Settings = {
   installedExtensions: [],
   historyEntries: [],
   downloadHistory: [],
+  bookmarks: DEFAULT_BOOKMARKS,
+  readingList: DEFAULT_READING_LIST,
+  workspaces: DEFAULT_WORKSPACES,
+  activeWorkspaceId: 'build',
   newTabUrl: 'persona://newtab',
   customAccentColors: {},
 };
